@@ -1,0 +1,43 @@
+#include "GJHGameplayStatics.h"
+
+#include "GJHDataStatics.h"
+#include "Character/Monster/GJHMonsterCharacter.h"
+#include "Character/Player/GJHPlayerCharacter.h"
+#include "Character/Player/GJHPlayerController.h"
+#include "Character/Player/GJHPlayerState.h"
+#include "Kismet/GameplayStatics.h"
+
+AGJHPlayerCharacter* UGJHGameplayStatics::GetGJHPlayerCharacter(const UObject* InWorldContextObject)
+{
+	return Cast<AGJHPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(InWorldContextObject, 0));
+}
+
+AGJHPlayerController* UGJHGameplayStatics::GetGJHPlayerController(const UObject* InWorldContextObject)
+{
+	return Cast<AGJHPlayerController>(UGameplayStatics::GetPlayerController(InWorldContextObject, 0));
+}
+
+AGJHPlayerState* UGJHGameplayStatics::GetGJHPlayerState(const UObject* InWorldContextObject)
+{
+	AGJHPlayerController* PlayerController = GetGJHPlayerController(InWorldContextObject);
+	return IsValid(PlayerController) ? PlayerController->GetPlayerState<AGJHPlayerState>() : nullptr;
+}
+
+FGameplayTag UGJHGameplayStatics::GetCurrentCharacterTypeTag(const UObject* InWorldContextObject)
+{
+	AGJHPlayerCharacter* PlayerCharacter = GetGJHPlayerCharacter(InWorldContextObject);
+	return IsValid(PlayerCharacter) ? PlayerCharacter->GetCharacterTypeTag() : FGameplayTag::EmptyTag;
+}
+
+void UGJHGameplayStatics::AddXP(const UObject* InWorldContextObject, const int32 InAddXP)
+{
+	AGJHPlayerState* PlayerState = GetGJHPlayerState(InWorldContextObject);
+	if (IsValid(PlayerState))
+		PlayerState->AddXP(InAddXP);
+}
+
+int32 UGJHGameplayStatics::GetMonsterLevel(AActor* InActor)
+{
+	AGJHMonsterCharacter* MonsterCharacter = Cast<AGJHMonsterCharacter>(InActor);
+	return IsValid(MonsterCharacter) ? MonsterCharacter->GetMonsterIndex() : 0;
+}
