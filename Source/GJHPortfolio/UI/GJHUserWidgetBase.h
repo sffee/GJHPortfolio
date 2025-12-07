@@ -4,6 +4,9 @@
 #include "Blueprint/UserWidget.h"
 #include "GJHUserWidgetBase.generated.h"
 
+class AGJHPlayerState;
+class UGJHAbilitySystemComponent;
+
 UCLASS(Abstract, Blueprintable)
 class GJHPORTFOLIO_API UGJHUserWidgetBase : public UUserWidget
 {
@@ -15,4 +18,8 @@ public:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+protected:
+	UGJHAbilitySystemComponent* GetAbilitySystemComponent() const;
+	AGJHPlayerState* GetPlayerState() const;
 };

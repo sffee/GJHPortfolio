@@ -36,6 +36,22 @@ void UGJHGameplayStatics::AddXP(const UObject* InWorldContextObject, const int32
 		PlayerState->AddXP(InAddXP);
 }
 
+void UGJHGameplayStatics::AddSkillPoint(const UObject* InWorldContextObject, const int32 InAddPoint)
+{
+	AGJHPlayerState* PlayerState = GetGJHPlayerState(InWorldContextObject);
+	if (IsValid(PlayerState))
+		PlayerState->AddSkillPoint(InAddPoint);
+}
+
+int32 UGJHGameplayStatics::GetSkillPoint(const UObject* InWorldContextObject)
+{
+	AGJHPlayerState* PlayerState = GetGJHPlayerState(InWorldContextObject);
+	if (IsValid(PlayerState))
+		return PlayerState->GetSkillPoint();
+
+	return 0;
+}
+
 int32 UGJHGameplayStatics::GetMonsterLevel(AActor* InActor)
 {
 	AGJHMonsterCharacter* MonsterCharacter = Cast<AGJHMonsterCharacter>(InActor);

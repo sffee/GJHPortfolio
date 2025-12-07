@@ -4,6 +4,8 @@
 #include "Data/DataTable/GJHDataTableTypes.h"
 #include "GameplayTag/GJHGameplayTag.h"
 #include "Library/GJHDataStatics.h"
+#include "Library/GJHGameplayStatics.h"
+#include "Subsystem/GJHDataSubSystem.h"
 
 UGJHAbilitySystemComponent::UGJHAbilitySystemComponent()
 {
@@ -127,9 +129,39 @@ void UGJHAbilitySystemComponent::ApplyGameplayEffects(const TArray<TSubclassOf<U
 		ApplyGameplayEffect(GameplayEffectClass, Level);
 }
 
+void UGJHAbilitySystemComponent::AddSkillLevel(const int32 InSkillIndex, int32 InAddPoint)
+{
+	FGameplayAbilitySpec* Spec = GetSpecBySkillIndex(InSkillIndex);
+	if (Spec == nullptr)
+		return;
+
+	FGJHSkillTableInfo SkillTableInfo = UGJHDataStatics::GetSkillInfo(this, InSkillIndex);
+	if (SkillTableInfo.Index == INVALID_SKILL_INDEX)
+		return;
+	
+	const int32 AbilityLevel = Spec->Level;
+	const int32 NewSkillLevel = AbilityLevel + (InAddPoint * -1.f); 
+
+	if (NewSkillLevel < SkillTableInfo.MinLevel || SkillTableInfo.MaxLevel < NewSkillLevel)
+		return;
+
+	Spec->Level += (InAddPoint * -1.f);
+	UGJHGameplayStatics::AddSkillPoint(this, InAddPoint);
+	OnAbilityLevelChanged.Broadcast(InSkillIndex, Spec->Level);
+}
+
+int32 UGJHAbilitySystemComponent::GetAbilityLevelBySkillIndex(const int32 InSkillIndex)
+{
+	FGameplayAbilitySpec* AbilitySpec = GetSpecBySkillIndex(InSkillIndex);
+	if (AbilitySpec)
+		return AbilitySpec->Level;
+
+	return 0;
+}
+
 void UGJHAbilitySystemComponent::EquipAbility(const int32 InSkillIndex, const FGameplayTag& InQuickSlotInputTag)
 {
-	FGameplayAbilitySpec* AbilitySpec = GetSpecFromSkillIndex(InSkillIndex);
+	FGameplayAbilitySpec* AbilitySpec = GetSpecBySkillIndex(InSkillIndex);
 	if (AbilitySpec == nullptr)
 		return;
 
@@ -141,7 +173,7 @@ void UGJHAbilitySystemComponent::EquipAbility(const int32 InSkillIndex, const FG
 	OnAbilityEquipped.Broadcast(InSkillIndex, InQuickSlotInputTag, PrevQuickSlotInputTag);
 }
 
-FGameplayAbilitySpec* UGJHAbilitySystemComponent::GetSpecFromAbilityTag(const FGameplayTag& InAbilityTag)
+FGameplayAbilitySpec* UGJHAbilitySystemComponent::GetSpecByAbilityTag(const FGameplayTag& InAbilityTag)
 {
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
@@ -155,7 +187,7 @@ FGameplayAbilitySpec* UGJHAbilitySystemComponent::GetSpecFromAbilityTag(const FG
 	return nullptr;
 }
 
-FGameplayAbilitySpec* UGJHAbilitySystemComponent::GetSpecFromQuickSlotInputTag(const FGameplayTag& InQuickSlotInputTag)
+FGameplayAbilitySpec* UGJHAbilitySystemComponent::GetSpecByQuickSlotInputTag(const FGameplayTag& InQuickSlotInputTag)
 {
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
@@ -166,7 +198,7 @@ FGameplayAbilitySpec* UGJHAbilitySystemComponent::GetSpecFromQuickSlotInputTag(c
 	return nullptr;
 }
 
-FGameplayAbilitySpec* UGJHAbilitySystemComponent::GetSpecFromSkillIndex(const int32 InSkillIndex)
+FGameplayAbilitySpec* UGJHAbilitySystemComponent::GetSpecBySkillIndex(const int32 InSkillIndex)
 {
 	const FGJHSkillTableInfo SkillInfo = UGJHDataStatics::GetSkillInfo(this, InSkillIndex);
 	if (SkillInfo.Ability == nullptr)

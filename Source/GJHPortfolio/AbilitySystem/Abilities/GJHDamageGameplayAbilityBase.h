@@ -21,6 +21,7 @@ protected:
 	TSubclassOf<UGameplayEffect> DamageEffect;
 
 protected:
+	float GetDamage(int32 InComboIndex);
 	void ApplyDamage(float InDamage, AActor* InTarget, const int32 InComboIndex, const FGameplayTag& InDamageType = FGJHGameplayTag::Ability_DamageType_Attack()) const;
 
 private:

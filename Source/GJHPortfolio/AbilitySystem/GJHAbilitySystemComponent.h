@@ -7,6 +7,7 @@
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FGJHAbilitiesGiven, const FGameplayAbilitySpec& AbilitySpec);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FGJHAbilityEquipped, int32 SkillIndex, FGameplayTag EquipQuickSlotInputTag, FGameplayTag PrevQuickSlotInputTag);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FGJHAbilityLevelChanged, int32 SkillIndex, int32 NewLevel);
 
 UCLASS()
 class GJHPORTFOLIO_API UGJHAbilitySystemComponent : public UAbilitySystemComponent
@@ -16,6 +17,7 @@ class GJHPORTFOLIO_API UGJHAbilitySystemComponent : public UAbilitySystemCompone
 public:
 	FGJHAbilitiesGiven OnAbilityGiven;
 	FGJHAbilityEquipped OnAbilityEquipped;
+	FGJHAbilityLevelChanged OnAbilityLevelChanged;
 	
 public:
 	UGJHAbilitySystemComponent();
@@ -39,6 +41,11 @@ public:
 	void ApplyGameplayEffects(const TArray<TSubclassOf<UGameplayEffect>> InGameplayEffects, int32 Level = -1);
 
 public:
+	void AddSkillLevel(const int32 InSkillIndex, int32 InAddPoint);
+
+	int32 GetAbilityLevelBySkillIndex(const int32 InSkillIndex);
+
+public:
 	void EquipAbility(const int32 InSkillIndex, const FGameplayTag& InQuickSlotInputTag);
 	void CancelAbilityByAbilityTag(const FGameplayTag& InAbilityTag);
 	void CancelAbilityByInputTag(const FGameplayTag& InInputTag);
@@ -48,8 +55,8 @@ private:
 	void ClearQuickSlot(FGameplayAbilitySpec* InAbilitySpec);
 	
 public:
-	FGameplayAbilitySpec* GetSpecFromAbilityTag(const FGameplayTag& InAbilityTag);
-	FGameplayAbilitySpec* GetSpecFromQuickSlotInputTag(const FGameplayTag& InQuickSlotInputTag);
-	FGameplayAbilitySpec* GetSpecFromSkillIndex(const int32 InSkillIndex);
+	FGameplayAbilitySpec* GetSpecByAbilityTag(const FGameplayTag& InAbilityTag);
+	FGameplayAbilitySpec* GetSpecByQuickSlotInputTag(const FGameplayTag& InQuickSlotInputTag);
+	FGameplayAbilitySpec* GetSpecBySkillIndex(const int32 InSkillIndex);
 	FGameplayTag GetQuickSlotInputTagFromSpec(const FGameplayAbilitySpec* InAbilitySpec);
 };

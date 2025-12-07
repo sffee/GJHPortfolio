@@ -7,6 +7,8 @@
 
 #include "GJHDataTableTypes.generated.h"
 
+#define INVALID_SKILL_INDEX -1
+
 class UGJHMonsterRewardDataAsset;
 class UGJHGameplayAbilityBase;
 
@@ -40,7 +42,7 @@ struct FGJHSkillTableInfo : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	int32 Index = -1;
+	int32 Index = INVALID_SKILL_INDEX;
 
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<UTexture2D> Icon = nullptr;
@@ -55,7 +57,7 @@ struct FGJHSkillTableInfo : public FTableRowBase
 	int32 LevelRequirement = 1;
 
 	UPROPERTY(EditDefaultsOnly)
-	int32 MinLevel = 0;
+	int32 MinLevel = 1;
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 MaxLevel = 1;
@@ -65,6 +67,12 @@ struct FGJHSkillTableInfo : public FTableRowBase
 
 	UPROPERTY(EditDefaultsOnly, meta = (Categories = "Ability.Cooldown"))
 	FGameplayTag CooldownTag;
+
+public:
+	bool IsValid() const
+	{
+		return Index != INVALID_SKILL_INDEX;
+	}
 };
 
 USTRUCT()

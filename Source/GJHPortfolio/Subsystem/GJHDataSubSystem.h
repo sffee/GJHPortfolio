@@ -6,8 +6,6 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "GJHDataSubSystem.generated.h"
 
-#define INVALID_SKILL_INDEX -1
-
 class UGameplayAbility;
 
 UCLASS()

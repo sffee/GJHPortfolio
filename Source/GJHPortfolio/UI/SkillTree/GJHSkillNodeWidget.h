@@ -44,10 +44,15 @@ public:
 
 public:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 public:
 	void SelectSlot();
 	void DeselectSlot();
+
+private:
+	void UpdateAddSubButton();
 
 public:
 	void SetSkillIndex(int32 InSkillIndex);
@@ -59,4 +64,6 @@ private:
 
 	UFUNCTION()
 	void OnClickButton_Sub();
+
+	void OnChangePoint(int32 NewPoint);
 };

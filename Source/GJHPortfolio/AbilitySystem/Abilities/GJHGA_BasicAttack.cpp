@@ -100,7 +100,7 @@ void UGJHGA_BasicAttack::ApplyDamageToTarget(const FGameplayEventData& InEventDa
 
 		HitActors.Add(HitActor);
 
-		ApplyDamage(10.f, HitActor, CurrentComboIndex + 1);
+		ApplyDamage(GetDamage(CurrentComboIndex + 1), HitActor, CurrentComboIndex + 1);
 	}
 }
 

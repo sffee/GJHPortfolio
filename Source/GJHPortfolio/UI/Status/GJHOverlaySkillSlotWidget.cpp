@@ -37,7 +37,7 @@ void UGJHOverlaySkillSlotWidget::NativeConstruct()
 	{
 		if (UGJHAbilitySystemComponent* ASC = UGJHAbilitySystemStatics::GetAbilitySystemComponent(GetOwningPlayer()))
 		{
-			FGameplayAbilitySpec* AbilitySpec = ASC->GetSpecFromQuickSlotInputTag(QuickSlotInputTag);
+			FGameplayAbilitySpec* AbilitySpec = ASC->GetSpecByQuickSlotInputTag(QuickSlotInputTag);
 			if (AbilitySpec)
 				UpdateSlot(AbilitySpec);
 		}

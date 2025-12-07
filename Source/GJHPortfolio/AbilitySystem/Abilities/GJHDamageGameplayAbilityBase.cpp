@@ -5,6 +5,14 @@
 #include "GameplayTag/GJHGameplayTag.h"
 #include "Library/GJHAbilitySystemStatics.h"
 
+float UGJHDamageGameplayAbilityBase::GetDamage(int32 InComboIndex)
+{
+	if (DamageKindData.Contains(InComboIndex) == false)
+		return 0.f;
+
+	return DamageKindData[InComboIndex].Damage.GetValueAtLevel(GetAbilityLevel());
+}
+
 void UGJHDamageGameplayAbilityBase::ApplyDamage(float InDamage, AActor* InTarget, const int32 InComboIndex, const FGameplayTag& InDamageType) const
 {
 	if (DamageEffect == nullptr)
