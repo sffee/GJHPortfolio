@@ -22,6 +22,9 @@ public:
 public:
 	UPROPERTY(EditAnywhere, Category = "Input|UI")
 	TObjectPtr<UInputAction> SkillTreeInputAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input|UI")
+	TObjectPtr<UInputAction> InventoryInputAction;
 	
 public:
 	UPROPERTY(EditAnywhere, Category = "Input|Ability", meta = (Categories = "Input", ForceInlineRow))

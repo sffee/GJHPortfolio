@@ -21,6 +21,7 @@ GJH_GAMEPLAYTAG(Input_QuickSlot_Q, "Input.QuickSlot.Q")
 // UI
 GJH_GAMEPLAYTAG(UI_Type_HUD, "UI.Type.HUD")
 GJH_GAMEPLAYTAG(UI_Type_SkillTree, "UI.Type.SkillTree")
+GJH_GAMEPLAYTAG(UI_Type_Inventory, "UI.Type.Inventory")
 
 // DataTable
 GJH_GAMEPLAYTAG(DataTable_Type_CharacterTableInfo, "DataTable.Type.CharacterTableInfo")

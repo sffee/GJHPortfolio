@@ -5,6 +5,7 @@
 #include "AbilitySystem/GJHAbilitySystemComponent.h"
 #include "Character/Components/GJHDamageTextComponent.h"
 #include "Components/GJHInputComponent.h"
+#include "Components/GJHInventoryComponent.h"
 #include "GameplayTag/GJHGameplayTag.h"
 #include "Library/GJHAbilitySystemStatics.h"
 #include "Subsystem/GJHUISubSystem.h"
@@ -12,6 +13,7 @@
 
 AGJHPlayerController::AGJHPlayerController()
 {
+	InventoryComponent = CreateDefaultSubobject<UGJHInventoryComponent>(TEXT("InventoryComponent"));
 }
 
 void AGJHPlayerController::BeginPlay()
@@ -36,6 +38,7 @@ void AGJHPlayerController::SetupInputComponent()
 	TDRInputComponent->BindAction(InputConfig->MoveInputAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
 	TDRInputComponent->BindAction(InputConfig->LookInputAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Look);
 	TDRInputComponent->BindAction(InputConfig->SkillTreeInputAction, ETriggerEvent::Triggered, this, &ThisClass::Input_SkillTree);
+	TDRInputComponent->BindAction(InputConfig->InventoryInputAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Inventory);
 }
 
 void AGJHPlayerController::InitHUDWidget() const
@@ -124,6 +127,13 @@ void AGJHPlayerController::Input_SkillTree(const FInputActionValue& Value)
 	UGJHUISubSystem* UISubSystem = UGJHUISubSystem::Get(this);
 	if (IsValid(UISubSystem))
 		UISubSystem->ToggleUI(FGJHGameplayTag::UI_Type_SkillTree());
+}
+
+void AGJHPlayerController::Input_Inventory(const FInputActionValue& Value)
+{
+	UGJHUISubSystem* UISubSystem = UGJHUISubSystem::Get(this);
+	if (IsValid(UISubSystem))
+		UISubSystem->ToggleUI(FGJHGameplayTag::UI_Type_Inventory());
 }
 
 void AGJHPlayerController::CreateDamageText(AActor* InTargetActor, float InDamage) const
