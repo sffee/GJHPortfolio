@@ -1,6 +1,7 @@
 #include "GJHAbilitySystemStatics.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "GJHGameplayStatics.h"
 #include "AbilitySystem/GJHAbilitySystemComponent.h"
 #include "AbilitySystem/GJHAbilityTypes.h"
 

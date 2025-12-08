@@ -44,6 +44,7 @@ public:
 	void AddSkillLevel(const int32 InSkillIndex, int32 InAddPoint);
 
 	int32 GetAbilityLevelBySkillIndex(const int32 InSkillIndex);
+	FString GetDescriptionBySkillIndex(const int32 InSkillIndex);
 
 public:
 	void EquipAbility(const int32 InSkillIndex, const FGameplayTag& InQuickSlotInputTag);

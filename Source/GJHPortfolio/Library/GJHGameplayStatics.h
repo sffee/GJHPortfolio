@@ -22,7 +22,10 @@ public:
 	static FGameplayTag GetCurrentCharacterTypeTag(const UObject* InWorldContextObject);
 
 public:
-	static int32 GetMonsterLevel(AActor* InActor);
+	static int32 GetCharacterLevel(AActor* InActor);
+	static int32 GetPlayerCharacterLevel(UObject* InWorldContextObject);
+	
+	static int32 GetMonsterIndex(AActor* InActor);
 	
 public:
 	static void AddXP(const UObject* InWorldContextObject, const int32 InAddXP);

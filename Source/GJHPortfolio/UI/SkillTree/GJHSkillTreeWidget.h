@@ -52,6 +52,7 @@ public:
 
 private:
 	void InitSkillNode();
+	void UpdateDescription() const;
 
 private:
 	void OnClickedSkillNode(UGJHSkillNodeWidget* SkillNodeWidget);

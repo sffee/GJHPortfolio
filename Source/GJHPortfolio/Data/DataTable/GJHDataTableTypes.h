@@ -4,6 +4,7 @@
 #include "GameplayTagContainer.h"
 #include "ScalableFloat.h"
 #include "Engine/DataTable.h"
+#include "AttributeSet.h"
 
 #include "GJHDataTableTypes.generated.h"
 
@@ -49,10 +50,7 @@ struct FGJHSkillTableInfo : public FTableRowBase
 	
 	UPROPERTY(EditAnywhere)
 	FString Name = FString();
-
-	UPROPERTY(EditAnywhere)
-	FString Description = FString();
-
+	
 	UPROPERTY(EditDefaultsOnly)
 	int32 LevelRequirement = 1;
 

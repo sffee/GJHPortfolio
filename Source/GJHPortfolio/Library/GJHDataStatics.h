@@ -33,6 +33,9 @@ public:
 	static FGameplayTag GetSkillCooldownTag(const UObject* InWorldContextObject, const int32 InSkillIndex);
 	static FGameplayTag GetSkillCooldownTag(const UObject* InWorldContextObject, const FGameplayTag& InCharacterTypeTag, const int32 InSkillIndex);
 
+	static int32 GetSkillLevelRequireBySkillIndex(const UObject* InWorldContextObject, const int32 InSkillIndex);
+	static int32 GetSkillLevelRequireBySkillIndex(const UObject* InWorldContextObject, const FGameplayTag& InCharacterTypeTag, const int32 InSkillIndex);
+
 	static void ForeachSkillInfo(const UObject* InWorldContextObject, TFunctionRef<void(const FGJHSkillTableInfo&)> InFunc);
 	static void ForeachSkillInfo(const UObject* InWorldContextObject, const FGameplayTag& InCharacterTypeTag, TFunctionRef<void(const FGJHSkillTableInfo&)> InFunc);
 };

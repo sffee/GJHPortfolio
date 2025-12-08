@@ -1,7 +1,9 @@
 #include "GJHSkillTreeWidget.h"
 
 #include "GJHSkillNodeWidget.h"
+#include "AbilitySystem/GJHAbilitySystemComponent.h"
 #include "Character/Player/GJHPlayerState.h"
+#include "Components/RichTextBlock.h"
 #include "Components/TextBlock.h"
 #include "Components/WrapBox.h"
 #include "Library/GJHDataStatics.h"
@@ -68,6 +70,17 @@ void UGJHSkillTreeWidget::InitSkillNode()
 	});
 }
 
+void UGJHSkillTreeWidget::UpdateDescription() const
+{
+	if (GetAbilitySystemComponent() && IsValid(SelectedNode))
+	{
+		const FString Description = GetAbilitySystemComponent()->GetDescriptionBySkillIndex(SelectedNode->GetSkillIndex());
+
+		if (RichTextBlock_Description)
+			RichTextBlock_Description->SetText(FText::FromString(Description));
+	}
+}
+
 void UGJHSkillTreeWidget::OnClickedSkillNode(UGJHSkillNodeWidget* SkillNodeWidget)
 {
 	if (SelectedNode == SkillNodeWidget)
@@ -78,9 +91,13 @@ void UGJHSkillTreeWidget::OnClickedSkillNode(UGJHSkillNodeWidget* SkillNodeWidge
 
 	SkillNodeWidget->SelectSlot();
 	SelectedNode = SkillNodeWidget;
+
+	UpdateDescription();
 }
 
 void UGJHSkillTreeWidget::OnChangeSkillPoint(int32 NewPoint)
 {
 	TextBlock_SkillPoint->SetText(FText::AsNumber(NewPoint));
+
+	UpdateDescription();
 }

@@ -29,6 +29,23 @@ FGameplayTag UGJHGameplayStatics::GetCurrentCharacterTypeTag(const UObject* InWo
 	return IsValid(PlayerCharacter) ? PlayerCharacter->GetCharacterTypeTag() : FGameplayTag::EmptyTag;
 }
 
+int32 UGJHGameplayStatics::GetCharacterLevel(AActor* InActor)
+{
+	AGJHCharacterBase* Character = Cast<AGJHCharacterBase>(InActor);
+	return IsValid(Character) ? Character->GetCharacterLevel() : 0;
+}
+
+int32 UGJHGameplayStatics::GetPlayerCharacterLevel(UObject* InWorldContextObject)
+{
+	return GetCharacterLevel(UGameplayStatics::GetPlayerCharacter(InWorldContextObject, 0));
+}
+
+int32 UGJHGameplayStatics::GetMonsterIndex(AActor* InActor)
+{
+	AGJHMonsterCharacter* MonsterCharacter = Cast<AGJHMonsterCharacter>(InActor);
+	return IsValid(MonsterCharacter) ? MonsterCharacter->GetMonsterIndex() : 0;
+}
+
 void UGJHGameplayStatics::AddXP(const UObject* InWorldContextObject, const int32 InAddXP)
 {
 	AGJHPlayerState* PlayerState = GetGJHPlayerState(InWorldContextObject);
@@ -50,10 +67,4 @@ int32 UGJHGameplayStatics::GetSkillPoint(const UObject* InWorldContextObject)
 		return PlayerState->GetSkillPoint();
 
 	return 0;
-}
-
-int32 UGJHGameplayStatics::GetMonsterLevel(AActor* InActor)
-{
-	AGJHMonsterCharacter* MonsterCharacter = Cast<AGJHMonsterCharacter>(InActor);
-	return IsValid(MonsterCharacter) ? MonsterCharacter->GetMonsterIndex() : 0;
 }

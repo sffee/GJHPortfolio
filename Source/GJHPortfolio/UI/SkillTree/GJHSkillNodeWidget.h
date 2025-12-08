@@ -56,7 +56,7 @@ private:
 
 public:
 	void SetSkillIndex(int32 InSkillIndex);
-	FORCEINLINE int32 GetSkillIndex(int32 InSkillIndex) const { return SkillIndex; }
+	FORCEINLINE int32 GetSkillIndex() const { return SkillIndex; }
 	
 private:
 	UFUNCTION()

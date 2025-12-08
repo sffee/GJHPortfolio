@@ -39,6 +39,19 @@ void UGJHGA_BasicAttack::InputPressed(const FGameplayAbilitySpecHandle Handle, c
 	SetNextAnimMontageSection();
 }
 
+FString UGJHGA_BasicAttack::GetDescription()
+{
+	const int32 Damage1 = DamageKindData.Contains(1) ? DamageKindData[1].Damage.GetValueAtLevel(GetAbilityLevel()) : -1;
+	const int32 Damage2 = DamageKindData.Contains(2) ? DamageKindData[2].Damage.GetValueAtLevel(GetAbilityLevel()) : -1;
+	const int32 Damage3 = DamageKindData.Contains(3) ? DamageKindData[3].Damage.GetValueAtLevel(GetAbilityLevel()) : -1;
+	const int32 Damage4 = DamageKindData.Contains(4) ? DamageKindData[4].Damage.GetValueAtLevel(GetAbilityLevel()) : -1;
+
+	FString Description = Super::GetDescription();
+	Description += FString::Printf(TEXT("적에게 근접 공격을 가해 피해를 입힌다.\n1타 : <Red>%d</>\n2타 : <Red>%d</>\n3타 : <Red>%d</>\n4타 : <Red>%d</>"), Damage1, Damage2, Damage3, Damage4);
+
+	return Description;
+}
+
 void UGJHGA_BasicAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);

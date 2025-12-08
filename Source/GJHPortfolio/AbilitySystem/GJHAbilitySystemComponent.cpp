@@ -159,6 +159,26 @@ int32 UGJHAbilitySystemComponent::GetAbilityLevelBySkillIndex(const int32 InSkil
 	return 0;
 }
 
+FString UGJHAbilitySystemComponent::GetDescriptionBySkillIndex(const int32 InSkillIndex)
+{
+	FGameplayAbilitySpec* AbilitySpec = GetSpecBySkillIndex(InSkillIndex);
+	if (AbilitySpec)
+	{
+		if (UGJHGameplayAbilityBase* Ability = Cast<UGJHGameplayAbilityBase>(AbilitySpec->NonReplicatedInstances[0]))
+			return Ability->GetDescription();
+	}
+	else
+	{
+		int32 CharacterLevel = UGJHGameplayStatics::GetPlayerCharacterLevel(this);
+		int32 AbilityLevelRequire = UGJHDataStatics::GetSkillLevelRequireBySkillIndex(this, InSkillIndex);
+
+		if (CharacterLevel < AbilityLevelRequire)
+			return FString::Printf(TEXT("<Red>스킬 습득에 필요한 레벨 : %d</>"), AbilityLevelRequire);
+	}
+
+	return FString(TEXT("UnKnown"));
+}
+
 void UGJHAbilitySystemComponent::EquipAbility(const int32 InSkillIndex, const FGameplayTag& InQuickSlotInputTag)
 {
 	FGameplayAbilitySpec* AbilitySpec = GetSpecBySkillIndex(InSkillIndex);

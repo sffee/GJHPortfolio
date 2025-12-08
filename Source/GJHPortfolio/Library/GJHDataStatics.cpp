@@ -113,6 +113,21 @@ FGameplayTag UGJHDataStatics::GetSkillCooldownTag(const UObject* InWorldContextO
 	return SkillInfo.CooldownTag;
 }
 
+int32 UGJHDataStatics::GetSkillLevelRequireBySkillIndex(const UObject* InWorldContextObject, const int32 InSkillIndex)
+{
+	const FGameplayTag CurrentCharacterTypeTag = UGJHGameplayStatics::GetCurrentCharacterTypeTag(InWorldContextObject);
+	if (CurrentCharacterTypeTag.IsValid() == false)
+		return -1;
+
+	return GetSkillLevelRequireBySkillIndex(InWorldContextObject, CurrentCharacterTypeTag, InSkillIndex);
+}
+
+int32 UGJHDataStatics::GetSkillLevelRequireBySkillIndex(const UObject* InWorldContextObject, const FGameplayTag& InCharacterTypeTag, const int32 InSkillIndex)
+{
+	FGJHSkillTableInfo SkillInfo = GetSkillInfo(InWorldContextObject, InCharacterTypeTag, InSkillIndex);
+	return SkillInfo.LevelRequirement;
+}
+
 void UGJHDataStatics::ForeachSkillInfo(const UObject* InWorldContextObject, TFunctionRef<void(const FGJHSkillTableInfo&)> InFunc)
 {
 	FGameplayTag CurrentCharacterTypeTag = UGJHGameplayStatics::GetCurrentCharacterTypeTag(InWorldContextObject);

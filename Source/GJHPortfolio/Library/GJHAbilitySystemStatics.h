@@ -19,4 +19,7 @@ public:
 public:
 	static void SetKnockBackImpulse(FGameplayEffectContextHandle& InEffectContextHandle, const FVector InKnockBackImpulse);
 	static void SetDeathImpulse(FGameplayEffectContextHandle& InEffectContextHandle, const FVector InDeathImpulse);
+
+public:
+	
 };
