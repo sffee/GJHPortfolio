@@ -14,7 +14,7 @@ UGJHBTTask_SendInputToAbilitySystem::UGJHBTTask_SendInputToAbilitySystem()
 
 EBTNodeResult::Type UGJHBTTask_SendInputToAbilitySystem::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	OwningBehaviorTreeComponent = OwnerComp;
+	OwningBehaviorTreeComponent = &OwnerComp;
 	
 	AAIController* AIC = OwnerComp.GetAIOwner();
 	if (AIC)
@@ -73,6 +73,6 @@ void UGJHBTTask_SendInputToAbilitySystem::OnGameplayAbilityEnded(const FAbilityE
 	if (AbilitySpec == nullptr)
 		return;
 
-	if (AbilitySpec->Ability->AbilityTags.HasTagExact(AbilityTag))
+	if (AbilitySpec->Ability->GetAssetTags().HasTagExact(AbilityTag))
 		FinishLatentTask(*OwningBehaviorTreeComponent, EBTNodeResult::Succeeded);
 }

@@ -38,6 +38,8 @@ public:
 
 	static void ForeachSkillInfo(const UObject* InWorldContextObject, TFunctionRef<void(const FGJHSkillTableInfo&)> InFunc);
 	static void ForeachSkillInfo(const UObject* InWorldContextObject, const FGameplayTag& InCharacterTypeTag, TFunctionRef<void(const FGJHSkillTableInfo&)> InFunc);
+
+	static TSubclassOf<UGJHItemDefinition> GetItemDefinition(const UObject* InWorldContextObject, const int32 InItemIndex);
 };
 
 template <typename T>

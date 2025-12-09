@@ -3,6 +3,7 @@
 #include "GJHGameplayStatics.h"
 #include "AbilitySystem/GJHGameplayAbilityBase.h"
 #include "GJHSettings/GJHDataDeveloperSettings.h"
+#include "Item/Definition/GJHItemDefinition.h"
 #include "Subsystem/GJHDataSubSystem.h"
 
 UDataTable* UGJHDataStatics::GetDataTable(const FGameplayTag& InDataTableTypeTag)
@@ -144,4 +145,10 @@ void UGJHDataStatics::ForeachSkillInfo(const UObject* InWorldContextObject, cons
 	{
 		DataSubSystem->ForeachSkillInfo(InCharacterTypeTag, MoveTemp(InFunc));
 	}
+}
+
+TSubclassOf<UGJHItemDefinition> UGJHDataStatics::GetItemDefinition(const UObject* InWorldContextObject, const int32 InItemIndex)
+{
+	UGJHDataSubSystem* DataSubSystem = UGJHDataSubSystem::Get(InWorldContextObject);
+	return IsValid(DataSubSystem) ? DataSubSystem->GetItemInfo(InItemIndex).ItemDefinition : nullptr;
 }

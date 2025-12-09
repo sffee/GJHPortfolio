@@ -4,6 +4,8 @@
 #include "Components/ActorComponent.h"
 #include "GJHInventoryComponent.generated.h"
 
+class UGJHItemInstance;
+
 UCLASS()
 class GJHPORTFOLIO_API UGJHInventoryComponent : public UActorComponent
 {
@@ -12,7 +14,11 @@ class GJHPORTFOLIO_API UGJHInventoryComponent : public UActorComponent
 private:
 	UPROPERTY(EditAnywhere, Category = "GJH")
 	FIntPoint GridSize;
-	
+
+private:
+	UPROPERTY()
+	TArray<TObjectPtr<UGJHItemInstance>> ItemInstances;
+
 public:
 	UGJHInventoryComponent();
 
@@ -20,8 +26,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	UGJHItemInstance* AddItem(const int32 InItemIndex);
+	
 public:
 	FORCEINLINE FIntPoint GetGridSize() const { return GridSize; }
+	FORCEINLINE const TArray<TObjectPtr<UGJHItemInstance>>& GetItemInstances() const { return ItemInstances; }
 };

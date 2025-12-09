@@ -37,6 +37,20 @@ public:
 private:
 	void UpdateMouseCursorState();
 
+public:
+	template<typename T>
+	T* GetWidget(const FGameplayTag& InUITag);
+	
 private:
 	APlayerController* GetPlayerController() const;
 };
+
+template <typename T>
+T* UGJHUISubSystem::GetWidget(const FGameplayTag& InUITag)
+{
+	FGJHUIStateInfo& UIStateInfo = UIStateMap.FindOrAdd(InUITag);
+	if (UIStateInfo.bOpen == false)
+		return nullptr;
+
+	return Cast<T>(UIStateInfo.Widget);
+}

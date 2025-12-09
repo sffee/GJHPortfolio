@@ -46,7 +46,7 @@ void UGJHAbilitySystemComponent::AbilityInputPressedByAbilityTag(const FGameplay
 
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		if (AbilitySpec.Ability->AbilityTags.HasTagExact(InAbilityTag))
+		if (AbilitySpec.Ability->GetAssetTags().HasTagExact(InAbilityTag))
 		{
 			if (AbilitySpec.IsActive())
 				AbilitySpecInputPressed(AbilitySpec);
@@ -197,7 +197,7 @@ FGameplayAbilitySpec* UGJHAbilitySystemComponent::GetSpecByAbilityTag(const FGam
 {
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		for (const FGameplayTag& GameplayTag : AbilitySpec.Ability->AbilityTags)
+		for (const FGameplayTag& GameplayTag : AbilitySpec.Ability->GetAssetTags())
 		{
 			if (GameplayTag.MatchesTag(InAbilityTag))
 				return &AbilitySpec;
@@ -227,13 +227,13 @@ FGameplayAbilitySpec* UGJHAbilitySystemComponent::GetSpecBySkillIndex(const int3
 		return nullptr;
 	}
 	
-	const FGameplayTagContainer AbilityTags = SkillInfo.Ability.GetDefaultObject()->AbilityTags;
+	const FGameplayTagContainer AbilityTags = SkillInfo.Ability.GetDefaultObject()->GetAssetTags();
 	if (AbilityTags.IsEmpty())
 		return nullptr;
 	
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		for (const FGameplayTag& GameplayTag : AbilitySpec.Ability->AbilityTags)
+		for (const FGameplayTag& GameplayTag : AbilitySpec.Ability->GetAssetTags())
 		{
 			if (GameplayTag.MatchesTag(AbilityTags.First()))
 				return &AbilitySpec;
@@ -264,7 +264,7 @@ void UGJHAbilitySystemComponent::CancelAbilityByAbilityTag(const FGameplayTag& I
 
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		if (AbilitySpec.Ability->AbilityTags.HasTagExact(InAbilityTag))
+		if (AbilitySpec.Ability->GetAssetTags().HasTagExact(InAbilityTag))
 			CancelAbilityHandle(AbilitySpec.Handle);
 	}
 }

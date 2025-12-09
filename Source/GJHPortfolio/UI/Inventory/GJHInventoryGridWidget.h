@@ -4,6 +4,9 @@
 #include "UI/GJHUserWidgetBase.h"
 #include "GJHInventoryGridWidget.generated.h"
 
+class UGJHInventoryItemWidget;
+class UGJHItemInstance;
+class UGJHItemDefinition;
 class UGridPanel;
 class UGJHInventoryComponent;
 class UGJHInventorySlotWidget;
@@ -21,10 +24,30 @@ private:
 	UPROPERTY(EditAnywhere, Category = "GJH")
 	TSubclassOf<UGJHInventorySlotWidget> InventorySlotWidgetClass;
 
+	UPROPERTY(EditAnywhere, Category = "GJH")
+	TSubclassOf<UGJHInventoryItemWidget> InventoryItemWidgetClass;
+
+private:
 	TWeakObjectPtr<UGJHInventoryComponent> InventoryComponent;
+	FIntPoint InventoryGridSize;
+
+	TArray<TObjectPtr<UGJHInventorySlotWidget>> Slots;
+	TArray<TObjectPtr<UGJHInventoryItemWidget>> Items;
 
 public:
 	virtual void NativeConstruct() override;
 
-	void InitGrid() const;
+	void InitGrid();
+
+public:
+	bool FindEmptySlotIndex(TSubclassOf<UGJHItemDefinition> InItemDefinition, int32& OutSlotIndex);
+	
+	UGJHItemInstance* AddItem(TSubclassOf<UGJHItemDefinition> InItemDefinition);
+
+private:
+	bool IsSlotEmpty(const int32 InSlotIndex, const FIntPoint& InItemGridSize) const;
+	bool IsInGridBounds(const int32 InSlotIndex, const FIntPoint& InItemGridSize) const;
+
+private:
+	void UpdateSlot(UGJHItemInstance* InItemInstance, const int32 InSlotIndex);
 };

@@ -4,6 +4,10 @@ GJH_GAMEPLAYTAG(Character_Type_Melee, "Character.Type.Melee")
 GJH_GAMEPLAYTAG(Character_Monster_Grade, "Character.Monster.Grade")
 GJH_GAMEPLAYTAG(Character_Monster_Grade_Normal, "Character.Monster.Grade.Normal")
 
+// Item
+GJH_GAMEPLAYTAG(Item_Type_Consumable, "Item.Type.Consumable")
+GJH_GAMEPLAYTAG(Item_Type_Equipment, "Item.Type.Equipment")
+
 // Input
 GJH_GAMEPLAYTAG(Input, "Input")
 GJH_GAMEPLAYTAG(Input_Move, "Input.Move")
@@ -28,6 +32,7 @@ GJH_GAMEPLAYTAG(DataTable_Type_CharacterTableInfo, "DataTable.Type.CharacterTabl
 GJH_GAMEPLAYTAG(DataTable_Type_MonsterTableInfo, "DataTable.Type.MonsterTableInfo")
 GJH_GAMEPLAYTAG(DataTable_Type_MonsterRewardTableInfo, "DataTable.Type.MonsterRewardTableInfo")
 GJH_GAMEPLAYTAG(DataTable_Type_SkillTableInfo_Melee, "DataTable.Type.SkillTableInfo.Melee")
+GJH_GAMEPLAYTAG(DataTable_Type_ItemTableInfo, "DataTable.Type.ItemTableInfo")
 
 // Ability
 GJH_GAMEPLAYTAG(Ability_Skill_Active_BasicAttack, "Ability.Skill.Active.BasicAttack")

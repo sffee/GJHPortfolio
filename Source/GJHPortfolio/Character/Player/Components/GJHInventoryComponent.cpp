@@ -1,35 +1,42 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GJHInventoryComponent.h"
 
+#include "GameplayTag/GJHGameplayTag.h"
+#include "Item/Definition/GJHItemDefinition.h"
+#include "Item/Definition/GJHItemInstance.h"
+#include "Library/GJHDataStatics.h"
+#include "Library/GJHUIStatics.h"
+#include "UI/Inventory/GJHInventoryGridWidget.h"
+#include "UI/Inventory/GJHInventoryWidget.h"
 
-// Sets default values for this component's properties
 UGJHInventoryComponent::UGJHInventoryComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
-
-// Called when the game starts
 void UGJHInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	
 }
 
-
-// Called every frame
-void UGJHInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+UGJHItemInstance* UGJHInventoryComponent::AddItem(const int32 InItemIndex)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	TSubclassOf<UGJHItemDefinition> ItemDefinition = UGJHDataStatics::GetItemDefinition(this, InItemIndex);
+	if (ItemDefinition == nullptr)
+	{
+		ensure(false);
+		return nullptr;
+	}
 
-	// ...
+	UGJHInventoryWidget* InventoryWidget = UGJHUISubSystem::Get(this)->GetWidget<UGJHInventoryWidget>(FGJHGameplayTag::UI_Type_Inventory());
+	UGJHInventoryGridWidget* GridWidget = IsValid(InventoryWidget) ? InventoryWidget->GetGridWidget() : nullptr;
+	if (IsValid(GridWidget) == false)
+		return nullptr;
+
+	if (UGJHItemInstance* AddedItemInstance = GridWidget->AddItem(ItemDefinition); IsValid(AddedItemInstance))
+	{
+		ItemInstances.Add(AddedItemInstance);
+		return AddedItemInstance;
+	}
+
+	return nullptr;
 }
-

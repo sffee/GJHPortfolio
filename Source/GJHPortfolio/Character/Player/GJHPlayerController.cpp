@@ -134,6 +134,8 @@ void AGJHPlayerController::Input_Inventory(const FInputActionValue& Value)
 	UGJHUISubSystem* UISubSystem = UGJHUISubSystem::Get(this);
 	if (IsValid(UISubSystem))
 		UISubSystem->ToggleUI(FGJHGameplayTag::UI_Type_Inventory());
+
+	InventoryComponent->AddItem(0);
 }
 
 void AGJHPlayerController::CreateDamageText(AActor* InTargetActor, float InDamage) const

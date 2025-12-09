@@ -24,6 +24,7 @@ void UGJHDataSubSystem::Initialize(FSubsystemCollectionBase& Collection)
 	InitMonsterInfoTable();
 	InitMonsterRewardInfoTable();
 	InitSkillInfoTable();
+	InitItemInfoTable();
 }
 
 void UGJHDataSubSystem::InitCharacterInfoTable()
@@ -62,6 +63,14 @@ void UGJHDataSubSystem::InitSkillInfoTable()
 			SkillInfoMap.FindOrAdd(CharacterTag).FindOrAdd(InSkillInfo.Index) = InSkillInfo;
 		});
 	}
+}
+
+void UGJHDataSubSystem::InitItemInfoTable()
+{
+	UGJHDataStatics::ForeachDataTableInfo<FGJHItemTableInfo>(FGJHGameplayTag::DataTable_Type_ItemTableInfo() , [this](const FGJHItemTableInfo& InItemInfo)
+	{
+		ItemInfoMap.FindOrAdd(InItemInfo.Index) = InItemInfo;
+	});
 }
 
 FGJHMonsterTableInfo UGJHDataSubSystem::GetMonsterInfo(int32 InMonsterIndex)
@@ -117,4 +126,12 @@ void UGJHDataSubSystem::ForeachSkillInfo(FGameplayTag InCharacterTypeTag, TFunct
 	{
 		InFunc(Iter->Value);
 	}
+}
+
+FGJHItemTableInfo UGJHDataSubSystem::GetItemInfo(int32 InItemIndex)
+{
+	if (ItemInfoMap.Contains(InItemIndex) == false)
+		return FGJHItemTableInfo();
+
+	return ItemInfoMap[InItemIndex];
 }

@@ -3,27 +3,6 @@
 #include "GameplayTagContainer.h"
 #include "GameplayTagsManager.h"
 
-// struct GJHPORTFOLIO_API FGJHGameplayTag
-// {
-// 	#define GJH_GAMEPLAYTAG(Tag, TagName) \
-// 	static FGameplayTag Tag() \
-// 	{ \
-// 		static FGameplayTag LocalTag = []() -> FGameplayTag \
-// 		{ \
-// 			UGameplayTagsManager& Manager = UGameplayTagsManager::Get(); \
-// 			FGameplayTag OutTag = Manager.RequestGameplayTag(FName(TagName), false); \
-// 			if (!OutTag.IsValid()) \
-// 			{ \
-// 				OutTag = Manager.AddNativeGameplayTag(FName(TagName)); \
-// 			} \
-// 			return OutTag; \
-// 		}(); \
-// 		return LocalTag; \
-// 	};
-// 	#include "GJHGameplayTag.inl"
-// 	#undef GJH_GAMEPLAYTAG
-// };
-
 struct GJHPORTFOLIO_API FGJHGameplayTag
 {
 	#define GJH_GAMEPLAYTAG(Tag, TagName) \

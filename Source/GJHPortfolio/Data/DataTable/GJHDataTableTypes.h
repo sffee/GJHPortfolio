@@ -9,7 +9,9 @@
 #include "GJHDataTableTypes.generated.h"
 
 #define INVALID_SKILL_INDEX -1
+#define INVALID_ITEM_INDEX -1
 
+class UGJHItemDefinition;
 class UGJHMonsterRewardDataAsset;
 class UGJHGameplayAbilityBase;
 
@@ -83,4 +85,22 @@ struct FGJHMonsterRewardTableInfo : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, Category = "GJH")
 	FScalableFloat RewardXP;
+};
+
+USTRUCT()
+struct FGJHItemTableInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	int32 Index = INVALID_ITEM_INDEX;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UGJHItemDefinition> ItemDefinition;
+
+public:
+	bool IsValid() const
+	{
+		return Index != INVALID_ITEM_INDEX;
+	}
 };
