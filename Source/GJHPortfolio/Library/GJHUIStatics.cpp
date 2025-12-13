@@ -1,5 +1,6 @@
 #include "GJHUIStatics.h"
 
+#include "Blueprint/SlateBlueprintLibrary.h"
 #include "UI/GJHUserWidgetBase.h"
 #include "GJHSettings/GJHUIDeveloperSettings.h"
 
@@ -25,4 +26,15 @@ FGJHUISetting UGJHUIStatics::GetUIStateSetting(const FGameplayTag& InUITypeTag)
 	}
 
 	return GJHUIDeveloperSettings->WidgetMap[InUITypeTag];
+}
+
+FVector2D UGJHUIStatics::GetWidgetViewportPosition(UWidget* InWidget, const FVector2D& InOffset)
+{
+	const FGeometry Geometry = InWidget->GetCachedGeometry();
+
+	FVector2D PixelPosition;
+	FVector2D ViewportPosition;
+	USlateBlueprintLibrary::LocalToViewport(InWidget, InWidget->GetCachedGeometry(), InOffset, PixelPosition, ViewportPosition);
+	
+	return ViewportPosition;
 }

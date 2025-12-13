@@ -8,9 +8,9 @@ void UGJHDraggedSkillSlotWidget::NativeOnInitialized()
 	Super::NativeOnInitialized();
 }
 
-void UGJHDraggedSkillSlotWidget::SetSize(float InWidget, float InHeight)
+void UGJHDraggedSkillSlotWidget::SetSize(float InWidth, float InHeight)
 {
-	SizeBox_Root->SetWidthOverride(InWidget);
+	SizeBox_Root->SetWidthOverride(InWidth);
 	SizeBox_Root->SetHeightOverride(InHeight);
 }
 

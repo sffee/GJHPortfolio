@@ -27,6 +27,7 @@ protected:
 
 public:
 	UGJHItemInstance* AddItem(const int32 InItemIndex);
+	void UpdateItemSlotIndex(UGJHItemInstance* InItemInstance, const int32 InNewSlotIndex);
 	
 public:
 	FORCEINLINE FIntPoint GetGridSize() const { return GridSize; }

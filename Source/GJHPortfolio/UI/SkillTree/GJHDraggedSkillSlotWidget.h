@@ -25,7 +25,7 @@ public:
 	virtual void NativeOnInitialized() override;
 
 public:
-	void SetSize(float InWidget, float InHeight);
+	void SetSize(float InWidth, float InHeight);
 	void SetSkillIcon(UTexture2D* InTexture);
 	void SetSlotSkillIndex(int32 InSkillIndex);
 

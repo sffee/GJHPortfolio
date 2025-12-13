@@ -1,12 +1,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UI/GJHUITypes.h"
 #include "UI/GJHUserWidgetBase.h"
 #include "GJHInventorySlotWidget.generated.h"
 
+class USizeBox;
 class UGJHItemInstance;
 class UGJHInventoryGridWidget;
 class UBorder;
+
+DECLARE_DELEGATE_TwoParams(FGJHOnDraggedInventoryItemWidget, class UGJHDraggedInventoryItemWidget* DraggedInventoryItemWidget, int32 SlotIndex);
 
 UCLASS()
 class GJHPORTFOLIO_API UGJHInventorySlotWidget : public UGJHUserWidgetBase
@@ -14,6 +18,9 @@ class GJHPORTFOLIO_API UGJHInventorySlotWidget : public UGJHUserWidgetBase
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<USizeBox> SizeBox_Root;
+	
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UBorder> Border_Slot;
 	
@@ -38,14 +45,26 @@ private:
 	TWeakObjectPtr<UGJHItemInstance> ItemInstance;
 
 public:
+	FGJHOnDraggedInventoryItemWidget OnDragEnterInventoryItemWidget; 
+	FGJHOnDraggedInventoryItemWidget OnDragLeaveInventoryItemWidget; 
+	FGJHOnDraggedInventoryItemWidget OnDragCancelledInventoryItemWidget;
+	FGJHOnDraggedInventoryItemWidget OnDropInventoryItemWidget;
+
+public:
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnDragEnter(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual void NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual void NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
 	void SetData(const int32 InSlotIndex, UGJHInventoryGridWidget* InGridWidget);
-
-private:
-	void SetSlotColor(const FLinearColor& InColor) const;
+	void ClearItem();
+	
+public:
+	void SetSlotDefaultColor();
+	void UpdateDraggedSlotColor(const FGJHDraggedInventoryItemResult InDraggedInventoryItemResult) const;
 
 public:
 	FORCEINLINE void SetLeftTopIndex(const int32 InLeftTopIndex) { LeftTopIndex = InLeftTopIndex; };
@@ -55,6 +74,7 @@ public:
 	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
 	FORCEINLINE int32 GetLeftTopIndex() const { return LeftTopIndex; }
 	FORCEINLINE UGJHItemInstance* GetItemInstance() const { return ItemInstance.Get(); }
+	FVector2D GetSize() const;
 	
 	bool IsValidItem() const;
 };

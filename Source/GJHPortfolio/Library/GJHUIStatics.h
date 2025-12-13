@@ -7,6 +7,7 @@
 #include "Subsystem/GJHUISubSystem.h"
 #include "GJHUIStatics.generated.h"
 
+class UWidget;
 class UGJHUserWidgetBase;
 
 UCLASS()
@@ -17,4 +18,7 @@ class GJHPORTFOLIO_API UGJHUIStatics : public UBlueprintFunctionLibrary
 public:
 	static TSubclassOf<UGJHUserWidgetBase> GetUIWidgetClass(const FGameplayTag& InUITypeTag);
 	static FGJHUISetting GetUIStateSetting(const FGameplayTag& InUITypeTag);
+
+public:
+	static FVector2D GetWidgetViewportPosition(UWidget* InWidget, const FVector2D& InOffset = FVector2D::ZeroVector);
 };

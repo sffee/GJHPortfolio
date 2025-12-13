@@ -40,3 +40,15 @@ UGJHItemInstance* UGJHInventoryComponent::AddItem(const int32 InItemIndex)
 
 	return nullptr;
 }
+
+void UGJHInventoryComponent::UpdateItemSlotIndex(UGJHItemInstance* InItemInstance, const int32 InNewSlotIndex)
+{
+	for (UGJHItemInstance* ItemInstance : ItemInstances)
+	{
+		if (ItemInstance == InItemInstance)
+		{
+			ItemInstance->SetInventorySlotIndex(InNewSlotIndex);
+			return;
+		}
+	}
+}
