@@ -4,15 +4,15 @@
 #include "UI/GJHUserWidgetBase.h"
 #include "GJHInventoryItemWidget.generated.h"
 
+class UGJHPickupInventoryItemWidget;
 class UGJHInventoryGridWidget;
 class USizeBox;
-class UGJHDraggedInventoryItemWidget;
 class UBorder;
 class UTextBlock;
 class UImage;
 class UGJHItemInstance;
 
-DECLARE_DELEGATE_OneParam(FGJHOnItemDragDetected, class UGJHInventoryItemWidget* InventoryItemWidget);
+DECLARE_DELEGATE_OneParam(FGJHOnItemPickup, class UGJHInventoryItemWidget* InventoryItemWidget);
 
 UCLASS()
 class GJHPORTFOLIO_API UGJHInventoryItemWidget : public UGJHUserWidgetBase
@@ -37,20 +37,16 @@ private:
 	FLinearColor DefaultColor = FLinearColor(0.5f, 0.5f, 0.5f, 0.1f);
 	
 	UPROPERTY(EditAnywhere, Category = "GJH|Color")
-	FLinearColor HoveredColor = FLinearColor(0.87f, 0.56f, 0.063f, 0.75f);
+	FLinearColor HoveredColor = FLinearColor(0.43f, 0.87f, 0.036f, 0.75f);
 
 	UPROPERTY(EditAnywhere, Category = "GJH|Color")
-	FLinearColor DragValidPlacementColor = FLinearColor(0.43f, 0.87f, 0.036f, 0.75f);
+	FLinearColor DragValidPlacementColor = FLinearColor(0.87f, 0.56f, 0.063f, 0.75f);
 
 	UPROPERTY(EditAnywhere, Category = "GJH|Color")
 	FLinearColor DragInvalidPlacementColor = FLinearColor(1.f, 0.03f, 0.04f, 0.75f);
 
 public:
-	FGJHOnItemDragDetected OnItemDragDetected;
-	
-private:
-	UPROPERTY(EditAnywhere, Category = "GJH")
-	TSubclassOf<UGJHDraggedInventoryItemWidget> DraggedInventoryItemWidgetClass;
+	FGJHOnItemPickup OnItemPickup;
 	
 private:	
 	TWeakObjectPtr<UGJHItemInstance> ItemInstance;
@@ -65,9 +61,12 @@ public:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
-	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 
+private:
+	void PickupItem();
+	
 public:
 	void SetItemInstance(UGJHItemInstance* InItemInstance);
 	void SetGridWidget(UGJHInventoryGridWidget* InGridWidget);
@@ -76,6 +75,10 @@ public:
 public:
 	UGJHItemInstance* GetItemInstance() const { return ItemInstance.Get(); }
 	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
+	FIntPoint GetGridSize() const;
+	UTexture2D* GetItemIcon() const;
+	float GetWidthOverride() const;
+	float GetHeightOverride() const;
 
 private:
 	void OnChangedDragState(bool bIsStart);

@@ -1,8 +1,7 @@
 #include "GJHInventoryItemWidget.h"
 
-#include "GJHDraggedInventoryItemWidget.h"
 #include "GJHInventoryGridWidget.h"
-#include "Blueprint/DragDropOperation.h"
+#include "GJHPickupInventoryItemWidget.h"
 #include "Components/Border.h"
 #include "Components/Image.h"
 #include "Components/SizeBox.h"
@@ -36,10 +35,10 @@ FReply UGJHInventoryItemWidget::NativeOnMouseButtonUp(const FGeometry& InGeometr
 	if (bMouseButtonDown)
 	{
 		bMouseButtonDown = false;
-		// TODO : 아이템 들기
+		PickupItem();
 	}
 
-	return Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
+	return FReply::Handled();
 }
 
 void UGJHInventoryItemWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -47,35 +46,25 @@ void UGJHInventoryItemWidget::NativeOnMouseEnter(const FGeometry& InGeometry, co
 	Border_Slot->SetBrushColor(HoveredColor);
 }
 
+FReply UGJHInventoryItemWidget::NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	if (bMouseButtonDown)
+	{
+		bMouseButtonDown = false;
+		PickupItem();
+	}
+	
+	return FReply::Handled();
+}
+
 void UGJHInventoryItemWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
 {
 	Border_Slot->SetBrushColor(DefaultColor);
 }
 
-void UGJHInventoryItemWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
+void UGJHInventoryItemWidget::PickupItem()
 {
-	if (DraggedInventoryItemWidgetClass == nullptr)
-		return;
-	
-	UTexture2D* ItemIcon = Cast<UTexture2D>(Image_ItemIcon->GetBrush().GetResourceObject());
-	if (IsValid(ItemIcon) == false)
-		return;
-	
-	const FIntPoint ItemGridSize = ItemInstance->GetItemDefinition()->GetGridSize();
-	
-	UGJHDraggedInventoryItemWidget* DraggedInventoryItemWidget = CreateWidget<UGJHDraggedInventoryItemWidget>(GetOwningPlayer(), DraggedInventoryItemWidgetClass);
-	DraggedInventoryItemWidget->SetPrevSlotIndex(SlotIndex);
-	DraggedInventoryItemWidget->SetItemIcon(ItemIcon);
-	DraggedInventoryItemWidget->SetSize(ItemGridSize.X * SizeBox_Root->GetWidthOverride(), ItemGridSize.Y * SizeBox_Root->GetHeightOverride());
-	DraggedInventoryItemWidget->SetItemInstance(ItemInstance.Get());
-	
-	UDragDropOperation* DragDropOperation = NewObject<UDragDropOperation>(GetOwningPlayer());
-	DragDropOperation->DefaultDragVisual = DraggedInventoryItemWidget;
-	DragDropOperation->Pivot = EDragPivot::CenterCenter;
-	
-	OutOperation = DragDropOperation;
-
-	OnItemDragDetected.ExecuteIfBound(this);
+	OnItemPickup.ExecuteIfBound(this);
 }
 
 void UGJHInventoryItemWidget::SetItemInstance(UGJHItemInstance* InItemInstance)
@@ -98,6 +87,26 @@ void UGJHInventoryItemWidget::SetGridWidget(UGJHInventoryGridWidget* InGridWidge
 {
 	ParentGridWidget = InGridWidget;
 	ParentGridWidget->OnChangedDragState.AddUObject(this, &ThisClass::OnChangedDragState);
+}
+
+FIntPoint UGJHInventoryItemWidget::GetGridSize() const
+{
+	return ItemInstance.IsValid() ? ItemInstance->GetItemDefinition()->GetGridSize() : FIntPoint::ZeroValue;
+}
+
+UTexture2D* UGJHInventoryItemWidget::GetItemIcon() const
+{
+	return Cast<UTexture2D>(Image_ItemIcon->GetBrush().GetResourceObject());
+}
+
+float UGJHInventoryItemWidget::GetWidthOverride() const
+{
+	return SizeBox_Root->GetWidthOverride();
+}
+
+float UGJHInventoryItemWidget::GetHeightOverride() const
+{
+	return SizeBox_Root->GetHeightOverride();
 }
 
 void UGJHInventoryItemWidget::OnChangedDragState(bool bIsStart)

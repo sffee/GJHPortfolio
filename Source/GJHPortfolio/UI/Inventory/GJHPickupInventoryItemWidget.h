@@ -2,14 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "UI/GJHUserWidgetBase.h"
-#include "GJHDraggedInventoryItemWidget.generated.h"
+#include "GJHPickupInventoryItemWidget.generated.h"
 
 class UGJHItemInstance;
 class USizeBox;
 class UImage;
 
 UCLASS()
-class GJHPORTFOLIO_API UGJHDraggedInventoryItemWidget : public UGJHUserWidgetBase
+class GJHPORTFOLIO_API UGJHPickupInventoryItemWidget : public UGJHUserWidgetBase
 {
 	GENERATED_BODY()
 

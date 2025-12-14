@@ -28,3 +28,14 @@ int32 UGJHInventoryStatics::GetSlotIndexByCoordinate(const FIntPoint& InCoordina
 {
 	return InCoordinate.X * InRows + InCoordinate.Y;
 }
+
+bool UGJHInventoryStatics::IsInCoordinateBounds(const int32 InStartSlotIndex, const int32 InTargetSlotIndex, const FIntPoint& InCoordinate, const int32 InRows)
+{
+	const FIntPoint StartCoordinate = GetCoordinateBySlotIndex(InStartSlotIndex, InRows);
+	const FIntPoint TargetCoordinate = GetCoordinateBySlotIndex(InTargetSlotIndex, InRows);
+
+	const FIntRect StartRect(StartCoordinate.X, StartCoordinate.Y, StartCoordinate.X + InCoordinate.X, StartCoordinate.Y + InCoordinate.Y);
+	const FIntRect TargetRect(TargetCoordinate.X, TargetCoordinate.Y, TargetCoordinate.X + InCoordinate.X, TargetCoordinate.Y + InCoordinate.Y);
+
+	return StartRect.Intersect(TargetRect);
+}

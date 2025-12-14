@@ -26,6 +26,7 @@ public class GJHPortfolio : ModuleRules
 			"Niagara",
 			"AIModule",
 			"UMG",
+			"Slate",
 			"SlateCore",
 			"DeveloperSettings"
 		});

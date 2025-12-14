@@ -1,6 +1,5 @@
 #include "GJHInventorySlotWidget.h"
 
-#include "GJHDraggedInventoryItemWidget.h"
 #include "Components/Border.h"
 #include "GJHInventoryGridWidget.h"
 #include "Blueprint/DragDropOperation.h"
@@ -12,6 +11,7 @@ void UGJHInventorySlotWidget::NativeOnMouseEnter(const FGeometry& InGeometry, co
 	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
 
 	Border_Slot->SetBrushColor(HoveredColor);
+	OnMouseEnterInventorySlotWidget.ExecuteIfBound(this, SlotIndex);
 }
 
 void UGJHInventorySlotWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
@@ -19,6 +19,7 @@ void UGJHInventorySlotWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEve
 	Super::NativeOnMouseLeave(InMouseEvent);
 
 	Border_Slot->SetBrushColor(DefaultColor);
+	OnMouseLeaveInventorySlotWidget.ExecuteIfBound(this, SlotIndex);
 }
 
 FReply UGJHInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -26,41 +27,14 @@ FReply UGJHInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeome
 	return FReply::Handled();
 }
 
-void UGJHInventorySlotWidget::NativeOnDragEnter(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+FReply UGJHInventorySlotWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	UGJHDraggedInventoryItemWidget* DraggedItemWidget = Cast<UGJHDraggedInventoryItemWidget>(InOperation->DefaultDragVisual);
-	if (IsValid(DraggedItemWidget) == false)
-		return;
+	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		OnDropPickupInventoryItem.ExecuteIfBound(this);
+	}
 	
-	OnDragEnterInventoryItemWidget.ExecuteIfBound(DraggedItemWidget, SlotIndex);
-}
-
-void UGJHInventorySlotWidget::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
-{
-	UGJHDraggedInventoryItemWidget* DraggedItemWidget = Cast<UGJHDraggedInventoryItemWidget>(InOperation->DefaultDragVisual);
-	if (IsValid(DraggedItemWidget) == false)
-		return;
-	
-	OnDragLeaveInventoryItemWidget.ExecuteIfBound(DraggedItemWidget, SlotIndex);
-}
-
-void UGJHInventorySlotWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
-{
-	UGJHDraggedInventoryItemWidget* DraggedItemWidget = Cast<UGJHDraggedInventoryItemWidget>(InOperation->DefaultDragVisual);
-	if (IsValid(DraggedItemWidget) == false)
-		return;
-	
-	OnDragCancelledInventoryItemWidget.ExecuteIfBound(DraggedItemWidget, SlotIndex);
-}
-
-bool UGJHInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
-{
-	UGJHDraggedInventoryItemWidget* DraggedItemWidget = Cast<UGJHDraggedInventoryItemWidget>(InOperation->DefaultDragVisual);
-	if (IsValid(DraggedItemWidget) == false)
-		return false;
-	
-	OnDropInventoryItemWidget.ExecuteIfBound(DraggedItemWidget, SlotIndex);
-	return true;
+	return FReply::Handled();
 }
 
 void UGJHInventorySlotWidget::SetData(const int32 InSlotIndex, UGJHInventoryGridWidget* InGridWidget)
@@ -84,6 +58,10 @@ void UGJHInventorySlotWidget::SetSlotDefaultColor()
 void UGJHInventorySlotWidget::UpdateDraggedSlotColor(const FGJHDraggedInventoryItemResult InDraggedInventoryItemResult) const
 {
 	if (InDraggedInventoryItemResult.OverlappedItemCount == 0)
+	{
+		Border_Slot->SetBrushColor(DragEmptyPlacementColor);
+	}
+	else if (InDraggedInventoryItemResult.OverlappedItemCount == 1)
 	{
 		Border_Slot->SetBrushColor(DragValidPlacementColor);
 	}

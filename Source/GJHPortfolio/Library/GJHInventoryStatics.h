@@ -18,6 +18,7 @@ public:
 	static FIntPoint GetCoordinateBySlotIndex(const int32 InSlotIndex, const int32 InRows);
 	static int32 GetSlotIndexByCoordinate(const int32 InX, const int32 InY, const int32 InRows);
 	static int32 GetSlotIndexByCoordinate(const FIntPoint& InCoordinate, const int32 InRows);
+	static bool IsInCoordinateBounds(const int32 InStartSlotIndex, const int32 InTargetSlotIndex, const FIntPoint& InCoordinate, const int32 InRows);
 
 	template<typename T, typename FuncT>
 	static void ForeachSlots(const TArray<T>& InSlots, int32 InStartIndex, const FIntPoint& InSlotRange, int32 InRows, const FuncT& InFunction);

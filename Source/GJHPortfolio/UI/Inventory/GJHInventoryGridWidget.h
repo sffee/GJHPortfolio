@@ -5,7 +5,8 @@
 #include "UI/GJHUserWidgetBase.h"
 #include "GJHInventoryGridWidget.generated.h"
 
-class UGJHDraggedInventoryItemWidget;
+class UGJHPickupInventoryItemWidget;
+class UGJHInventoryWidget;
 class UGJHInventoryItemWidget;
 class UGJHItemInstance;
 class UGJHItemDefinition;
@@ -31,17 +32,21 @@ private:
 	UPROPERTY(EditAnywhere, Category = "GJH")
 	TSubclassOf<UGJHInventoryItemWidget> InventoryItemWidgetClass;
 
+	UPROPERTY(EditAnywhere, Category = "GJH")
+	TSubclassOf<UGJHPickupInventoryItemWidget> PickupInventoryItemWidgetClass;
+
 public:
 	FGJHOnChangedDragState OnChangedDragState;
 	
 private:
+	TWeakObjectPtr<UGJHInventoryWidget> ParentInventoryWidget;
 	TWeakObjectPtr<UGJHInventoryComponent> InventoryComponent;
 	FIntPoint InventoryGridSize;
 
 	TArray<TObjectPtr<UGJHInventorySlotWidget>> Slots;
 	TArray<TObjectPtr<UGJHInventoryItemWidget>> Items;
 
-	TWeakObjectPtr<UGJHDraggedInventoryItemWidget> DraggedInventoryItemWidget;
+	TWeakObjectPtr<UGJHPickupInventoryItemWidget> PickupInventoryItemWidget;
 	int32 DraggedSlotIndex = -1;
 	int32 LastDraggedStartSlotIndex = -1;
 
@@ -55,6 +60,7 @@ public:
 	bool FindEmptySlotIndex(TSubclassOf<UGJHItemDefinition> InItemDefinition, int32& OutSlotIndex);
 	
 	UGJHItemInstance* AddItem(TSubclassOf<UGJHItemDefinition> InItemDefinition);
+	void RemoveItem(const int32 InSlotIndex);
 
 private:
 	bool IsSlotEmpty(const int32 InSlotIndex, const FIntPoint& InItemGridSize) const;
@@ -63,21 +69,29 @@ private:
 	FGJHDraggedInventoryItemResult GetDraggedInventoryItemResult(const int32 InSlotIndex, const FIntPoint& InItemGridSize) const;
 	EGJHSlotQuadrant CalcSlotQuadrant(const int32 InSlotIndex) const;
 	int32 CalcDraggedStartSlotIndex(const int32 InSlotIndex, const FIntPoint& InItemGridSize, EGJHSlotQuadrant InSlotQuadrant) const;
+	UGJHInventoryItemWidget* GetInventoryItemWidgetBySlotIndex(const int32 InSlotIndex);
+	UGJHInventoryItemWidget* GetInventoryItemWidgetByItemInstance(const UGJHItemInstance* InItemInstance);
 
-private:
+private:	
 	void UpdateDraggedSlotWidget();
 	void UpdateSlot(UGJHItemInstance* InItemInstance, const int32 InSlotIndex);
-	void RestoreDraggedItem(UGJHDraggedInventoryItemWidget* InDraggedInventoryItemWidget);
 
-	void ClearDraggedInventoryWidget(UGJHDraggedInventoryItemWidget* InDraggedInventoryItemWidget, int32 SlotIndex);
+	void PickupItem(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget, int32 SlotIndex);
+	void RestorePickupItemToPrevSlot(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget);
+	void ClearPickupInventoryWidget(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget, int32 SlotIndex);
+	void SwapPickupItem(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget, int32 SlotIndex);
+
+	void CreatePickupInventoryItemWidget(UGJHInventoryItemWidget* InInventoryItemWidget);
 
 public:
 	bool IsDragged() const;
+
+public:
+	void SetParentWidget(UGJHInventoryWidget* InParentInventoryWidget);
 	
 private:
-	void OnItemDragDetected(UGJHInventoryItemWidget* InventoryItemWidget);
-	void OnDragEnterInventoryItem(UGJHDraggedInventoryItemWidget* InDraggedInventoryItemWidget, int32 SlotIndex);
-	void OnDragLeaveInventoryItem(UGJHDraggedInventoryItemWidget* InDraggedInventoryItemWidget, int32 SlotIndex);
-	void OnDragCancelledInventoryItem(UGJHDraggedInventoryItemWidget* InDraggedInventoryItemWidget, int32 SlotIndex);
-	void OnDropInventoryItem(UGJHDraggedInventoryItemWidget* InDraggedInventoryItemWidget, int32 SlotIndex);
+	void OnItemPickup(UGJHInventoryItemWidget* InInventoryItemWidget);
+	void OnDropPickupInventoryItem(UGJHInventorySlotWidget* InventorySlotWidget);
+	void OnMouseEnterInventorySlotWidget(UGJHInventorySlotWidget* InventorySlotWidget, int32 SlotIndex);
+	void OnMouseLeaveInventorySlotWidget(UGJHInventorySlotWidget* InventorySlotWidget, int32 SlotIndex);
 };

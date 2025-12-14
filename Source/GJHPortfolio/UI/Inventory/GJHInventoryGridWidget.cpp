@@ -1,11 +1,11 @@
 #include "GJHInventoryGridWidget.h"
 
-#include "GJHDraggedInventoryItemWidget.h"
 #include "GJHInventoryItemWidget.h"
 #include "GJHInventorySlotWidget.h"
+#include "GJHInventoryWidget.h"
+#include "GJHPickupInventoryItemWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Character/Player/Components/GJHInventoryComponent.h"
-#include "Components/CanvasPanelSlot.h"
 #include "Components/GridPanel.h"
 #include "Components/GridSlot.h"
 #include "Item/Definition/GJHItemDefinition.h"
@@ -27,7 +27,7 @@ void UGJHInventoryGridWidget::NativeTick(const FGeometry& MyGeometry, float InDe
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
-	if (DraggedInventoryItemWidget.IsValid())
+	if (PickupInventoryItemWidget.IsValid())
 		UpdateDraggedSlotWidget();
 }
 
@@ -47,10 +47,9 @@ void UGJHInventoryGridWidget::InitGrid()
 			UGJHInventorySlotWidget* SlotWidget = CreateWidget<UGJHInventorySlotWidget>(GetOwningPlayer(), InventorySlotWidgetClass);
 			check(SlotWidget);
 
-			SlotWidget->OnDragEnterInventoryItemWidget.BindUObject(this, &ThisClass::OnDragEnterInventoryItem);
-			SlotWidget->OnDragLeaveInventoryItemWidget.BindUObject(this, &ThisClass::OnDragLeaveInventoryItem);
-			SlotWidget->OnDragCancelledInventoryItemWidget.BindUObject(this, &ThisClass::OnDragCancelledInventoryItem);
-			SlotWidget->OnDropInventoryItemWidget.BindUObject(this, &ThisClass::OnDropInventoryItem);
+			SlotWidget->OnMouseEnterInventorySlotWidget.BindUObject(this, &ThisClass::OnMouseEnterInventorySlotWidget);
+			SlotWidget->OnMouseLeaveInventorySlotWidget.BindUObject(this, &ThisClass::OnMouseLeaveInventorySlotWidget);
+			SlotWidget->OnDropPickupInventoryItem.BindUObject(this, &ThisClass::OnDropPickupInventoryItem);
 
 			Slots.Add(SlotWidget);
 
@@ -113,6 +112,18 @@ UGJHItemInstance* UGJHInventoryGridWidget::AddItem(TSubclassOf<UGJHItemDefinitio
 
 	UpdateSlot(ItemInstance, EmptySlotIndex);
 	return ItemInstance;
+}
+
+void UGJHInventoryGridWidget::RemoveItem(const int32 InSlotIndex)
+{
+	for (UGJHInventoryItemWidget* InventoryItemWidget : Items)
+	{
+		if (UGJHInventoryStatics::IsInCoordinateBounds(InventoryItemWidget->GetSlotIndex(), InSlotIndex, InventoryItemWidget->GetGridSize(), InventoryGridSize.Y))
+		{
+			Items.Remove(*InventoryItemWidget);
+			return;
+		}
+	}
 }
 
 bool UGJHInventoryGridWidget::IsSlotEmpty(const int32 InSlotIndex, const FIntPoint& InItemGridSize) const
@@ -227,10 +238,31 @@ int32 UGJHInventoryGridWidget::CalcDraggedStartSlotIndex(const int32 InSlotIndex
 	return UGJHInventoryStatics::GetSlotIndexByCoordinate(ResultCoordinate, InventoryGridSize.Y);
 }
 
+UGJHInventoryItemWidget* UGJHInventoryGridWidget::GetInventoryItemWidgetBySlotIndex(const int32 InSlotIndex)
+{
+	for (UGJHInventoryItemWidget* InventoryItemWidget : Items)
+	{
+		if (UGJHInventoryStatics::IsInCoordinateBounds(InSlotIndex, InventoryItemWidget->GetSlotIndex(), InventoryItemWidget->GetGridSize(), InventoryGridSize.Y))
+			return InventoryItemWidget;
+	}
+
+	return nullptr;
+}
+
+UGJHInventoryItemWidget* UGJHInventoryGridWidget::GetInventoryItemWidgetByItemInstance(const UGJHItemInstance* InItemInstance)
+{
+	for (UGJHInventoryItemWidget* InventoryItemWidget : Items)
+	{
+		if (InventoryItemWidget->GetItemInstance() == InItemInstance)
+			return InventoryItemWidget;
+	}
+
+	return nullptr;
+}
+
 void UGJHInventoryGridWidget::UpdateDraggedSlotWidget()
 {
-	const UGJHItemDefinition* ItemDefinition = DraggedInventoryItemWidget->GetItemInstance()->GetItemDefinition();
-	const FIntPoint ItemGridSize = ItemDefinition->GetGridSize();
+	const FIntPoint ItemGridSize = PickupInventoryItemWidget->GetGridSize();
 
 	const FGJHDraggedInventoryItemResult DraggedInventoryItemResult = GetDraggedInventoryItemResult(DraggedSlotIndex, ItemGridSize);
 	if (LastDraggedStartSlotIndex != DraggedInventoryItemResult.StartSlotIndex)
@@ -241,6 +273,9 @@ void UGJHInventoryGridWidget::UpdateDraggedSlotWidget()
 			return true;
 		});
 	}
+
+	if (DraggedSlotIndex == -1)
+		return;
 	
 	UGJHInventoryStatics::ForeachSlots(Slots, DraggedInventoryItemResult.StartSlotIndex, ItemGridSize, InventoryGridSize.Y, [&DraggedInventoryItemResult](UGJHInventorySlotWidget* SlotWidget) -> bool
 	{
@@ -264,7 +299,7 @@ void UGJHInventoryGridWidget::UpdateSlot(UGJHItemInstance* InItemInstance, const
 	ItemWidget->SetItemInstance(InItemInstance);
 	ItemWidget->SetSlotIndex(InSlotIndex);
 	ItemWidget->SetGridWidget(this);
-	ItemWidget->OnItemDragDetected.BindUObject(this, &ThisClass::OnItemDragDetected);
+	ItemWidget->OnItemPickup.BindUObject(this, &ThisClass::OnItemPickup);
 	
 	if (UGridSlot* GridSlot = GridPanel_Grid->AddChildToGrid(ItemWidget, ItemCoordinate.Y, ItemCoordinate.X); IsValid(GridSlot))
 	{
@@ -284,14 +319,14 @@ void UGJHInventoryGridWidget::UpdateSlot(UGJHItemInstance* InItemInstance, const
 	Items.Add(ItemWidget);
 }
 
-void UGJHInventoryGridWidget::RestoreDraggedItem(UGJHDraggedInventoryItemWidget* InDraggedInventoryItemWidget)
+void UGJHInventoryGridWidget::RestorePickupItemToPrevSlot(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget)
 {
-	UpdateSlot(InDraggedInventoryItemWidget->GetItemInstance(), InDraggedInventoryItemWidget->GetPrevSlotIndex());
+	UpdateSlot(InPickupInventoryItemWidget->GetItemInstance(), InPickupInventoryItemWidget->GetPrevSlotIndex());
 }
 
-void UGJHInventoryGridWidget::ClearDraggedInventoryWidget(UGJHDraggedInventoryItemWidget* InDraggedInventoryItemWidget, int32 SlotIndex)
+void UGJHInventoryGridWidget::ClearPickupInventoryWidget(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget, int32 SlotIndex)
 {
-	const UGJHItemDefinition* ItemDefinition = InDraggedInventoryItemWidget->GetItemInstance()->GetItemDefinition();
+	const UGJHItemDefinition* ItemDefinition = InPickupInventoryItemWidget->GetItemInstance()->GetItemDefinition();
 	const FIntPoint ItemGridSize = ItemDefinition->GetGridSize();
 
 	const FGJHDraggedInventoryItemResult DraggedInventoryItemResult = GetDraggedInventoryItemResult(SlotIndex, ItemGridSize);
@@ -301,62 +336,114 @@ void UGJHInventoryGridWidget::ClearDraggedInventoryWidget(UGJHDraggedInventoryIt
 		return true;
 	});
 
-	DraggedInventoryItemWidget = nullptr;
+	PickupInventoryItemWidget = nullptr;
 	DraggedSlotIndex = -1;
 	LastDraggedStartSlotIndex = -1;
 }
 
-bool UGJHInventoryGridWidget::IsDragged() const
+void UGJHInventoryGridWidget::SwapPickupItem(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget, int32 SlotIndex)
 {
-	return DraggedInventoryItemWidget.IsValid();
+	OnItemPickup(GetInventoryItemWidgetBySlotIndex(SlotIndex));
+	UpdateSlot(InPickupInventoryItemWidget->GetItemInstance(), SlotIndex);
 }
 
-void UGJHInventoryGridWidget::OnItemDragDetected(UGJHInventoryItemWidget* InventoryItemWidget)
+void UGJHInventoryGridWidget::CreatePickupInventoryItemWidget(UGJHInventoryItemWidget* InInventoryItemWidget)
 {
-	const UGJHItemDefinition* ItemDefinition = InventoryItemWidget->GetItemInstance()->GetItemDefinition();
-	const FIntPoint ItemGridSize = ItemDefinition->GetGridSize();
+	if (PickupInventoryItemWidgetClass == nullptr)
+		return;
 
-	UGJHInventoryStatics::ForeachSlots(Slots, InventoryItemWidget->GetSlotIndex(), ItemGridSize, InventoryGridSize.Y, [](UGJHInventorySlotWidget* SlotWidget) -> bool
+	if (PickupInventoryItemWidget.IsValid())
 	{
+		PickupInventoryItemWidget->RemoveFromParent();
+		PickupInventoryItemWidget = nullptr;
+	}
+	
+	UTexture2D* ItemIcon = InInventoryItemWidget->GetItemIcon(); 
+	if (IsValid(ItemIcon) == false)
+		return;
+	
+	const FIntPoint ItemGridSize = InInventoryItemWidget->GetGridSize();
+	
+	PickupInventoryItemWidget = CreateWidget<UGJHPickupInventoryItemWidget>(GetOwningPlayer(), PickupInventoryItemWidgetClass);
+	PickupInventoryItemWidget->SetPrevSlotIndex(InInventoryItemWidget->GetSlotIndex());
+	PickupInventoryItemWidget->SetItemIcon(ItemIcon);
+	PickupInventoryItemWidget->SetSize(ItemGridSize.X * InInventoryItemWidget->GetWidthOverride(), ItemGridSize.Y * InInventoryItemWidget->GetHeightOverride());
+	PickupInventoryItemWidget->SetItemInstance(InInventoryItemWidget->GetItemInstance());
+}
+
+bool UGJHInventoryGridWidget::IsDragged() const
+{
+	return PickupInventoryItemWidget.IsValid();
+}
+
+void UGJHInventoryGridWidget::SetParentWidget(UGJHInventoryWidget* InParentInventoryWidget)
+{
+	ParentInventoryWidget = InParentInventoryWidget;
+}
+
+void UGJHInventoryGridWidget::OnItemPickup(UGJHInventoryItemWidget* InInventoryItemWidget)
+{	
+	CreatePickupInventoryItemWidget(InInventoryItemWidget);
+	if (PickupInventoryItemWidget.IsValid() == false)
+		return;
+	
+	const FIntPoint ItemGridSize = InInventoryItemWidget->GetGridSize();
+
+	UGJHInventoryStatics::ForeachSlots(Slots, InInventoryItemWidget->GetSlotIndex(), ItemGridSize, InventoryGridSize.Y, [](UGJHInventorySlotWidget* SlotWidget) -> bool
+	{
+		SlotWidget->SetSlotDefaultColor();
 		SlotWidget->ClearItem();
 		return true;
 	});
+
+	RemoveItem(InInventoryItemWidget->GetSlotIndex());
 	
-	GridPanel_Grid->RemoveChild(InventoryItemWidget);
-	InventoryItemWidget->RemoveFromParent();
+	GridPanel_Grid->RemoveChild(InInventoryItemWidget);
+	InInventoryItemWidget->RemoveFromParent();
 
 	OnChangedDragState.Broadcast(true);
+
+	ParentInventoryWidget->PickupItem(PickupInventoryItemWidget.Get());
 }
 
-void UGJHInventoryGridWidget::OnDragEnterInventoryItem(UGJHDraggedInventoryItemWidget* InDraggedInventoryItemWidget, int32 SlotIndex)
+void UGJHInventoryGridWidget::OnDropPickupInventoryItem(UGJHInventorySlotWidget* InventorySlotWidget)
 {
-	DraggedInventoryItemWidget = InDraggedInventoryItemWidget;
-	DraggedSlotIndex = SlotIndex;
-}
+	if (PickupInventoryItemWidget.IsValid() == false)
+		return;
 
-void UGJHInventoryGridWidget::OnDragLeaveInventoryItem(UGJHDraggedInventoryItemWidget* InDraggedInventoryItemWidget, int32 SlotIndex)
-{
-	ClearDraggedInventoryWidget(InDraggedInventoryItemWidget, LastDraggedStartSlotIndex);
-}
-
-void UGJHInventoryGridWidget::OnDragCancelledInventoryItem(UGJHDraggedInventoryItemWidget* InDraggedInventoryItemWidget, int32 SlotIndex)
-{	
-	ClearDraggedInventoryWidget(InDraggedInventoryItemWidget, LastDraggedStartSlotIndex);
-}
-
-void UGJHInventoryGridWidget::OnDropInventoryItem(UGJHDraggedInventoryItemWidget* InDraggedInventoryItemWidget, int32 SlotIndex)
-{
-	if (IsSlotEmpty(LastDraggedStartSlotIndex, InDraggedInventoryItemWidget->GetGridSize()) == false)
+	FGJHDraggedInventoryItemResult DraggedInventoryItemResult = GetDraggedInventoryItemResult(InventorySlotWidget->GetSlotIndex(), PickupInventoryItemWidget->GetGridSize());
+	if (2 <= DraggedInventoryItemResult.OverlappedItemCount)
 	{
-		RestoreDraggedItem(InDraggedInventoryItemWidget);
+		return;
+	}
+	else if (DraggedInventoryItemResult.OverlappedItemCount == 1)
+	{
+		InventoryComponent->UpdateItemSlotIndex(PickupInventoryItemWidget->GetItemInstance(), LastDraggedStartSlotIndex);
+		SwapPickupItem(PickupInventoryItemWidget.Get(), DraggedInventoryItemResult.StartSlotIndex);
 	}
 	else
 	{
-		UpdateSlot(InDraggedInventoryItemWidget->GetItemInstance(), LastDraggedStartSlotIndex);
-		InventoryComponent->UpdateItemSlotIndex(InDraggedInventoryItemWidget->GetItemInstance(), LastDraggedStartSlotIndex);
+		UpdateSlot(PickupInventoryItemWidget->GetItemInstance(), LastDraggedStartSlotIndex);
+		InventoryComponent->UpdateItemSlotIndex(PickupInventoryItemWidget->GetItemInstance(), LastDraggedStartSlotIndex);
+		ParentInventoryWidget->DropPickupItem();
+		ClearPickupInventoryWidget(PickupInventoryItemWidget.Get(), LastDraggedStartSlotIndex);
 	}
-	
-	ClearDraggedInventoryWidget(InDraggedInventoryItemWidget, LastDraggedStartSlotIndex);
 
 	OnChangedDragState.Broadcast(false);
+}
+
+void UGJHInventoryGridWidget::OnMouseEnterInventorySlotWidget(UGJHInventorySlotWidget* InventorySlotWidget, int32 SlotIndex)
+{
+	if (PickupInventoryItemWidget.IsValid() == false)
+		return;
+
+	DraggedSlotIndex = SlotIndex;
+}
+
+void UGJHInventoryGridWidget::OnMouseLeaveInventorySlotWidget(UGJHInventorySlotWidget* InventorySlotWidget, int32 SlotIndex)
+{
+	if (PickupInventoryItemWidget.IsValid() == false)
+		return;
+
+	DraggedSlotIndex = -1;
 }
