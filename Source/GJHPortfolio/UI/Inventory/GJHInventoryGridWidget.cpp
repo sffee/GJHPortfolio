@@ -94,24 +94,33 @@ bool UGJHInventoryGridWidget::FindEmptySlotIndex(TSubclassOf<UGJHItemDefinition>
 	return false;
 }
 
-UGJHItemInstance* UGJHInventoryGridWidget::AddItem(TSubclassOf<UGJHItemDefinition> InItemDefinition)
+bool UGJHInventoryGridWidget::FindStackableSlotIndex(TSubclassOf<UGJHItemDefinition> InItemDefinition, FGJHInventoryStackableItemResult& OutStackableItemResult)
 {
-	int32 EmptySlotIndex = -1;
-	if (FindEmptySlotIndex(InItemDefinition, EmptySlotIndex) == false)
-		return nullptr;
+	if (InventoryComponent.IsValid() == false)
+		return false;
 
-	const bool bStackable = InItemDefinition->GetDefaultObject<UGJHItemDefinition>()->IsStackable();
-	if (bStackable)
+	const int32 MaxStack = InItemDefinition->GetDefaultObject<UGJHItemDefinition>()->GetMaxStack();
+	
+	for (UGJHInventoryItemWidget* ItemWidget : Items)
 	{
-		return nullptr;
+		if (ItemWidget->IsStackable() == false)
+			continue;
+
+		if (ItemWidget->GetItemDefinitionClass() != InItemDefinition)
+			continue;
+
+		int32 Remainder = MaxStack - ItemWidget->GetStack();
+		if (Remainder == 0)
+			continue;
+
+		OutStackableItemResult.SlotIndex = ItemWidget->GetSlotIndex();
+		OutStackableItemResult.Remainder = Remainder;
+		OutStackableItemResult.InventoryItemWidget = ItemWidget;
+
+		return true;
 	}
 
-	UGJHItemInstance* ItemInstance = NewObject<UGJHItemInstance>(InventoryComponent->GetOwner());
-	ItemInstance->SetItemDefinition(InItemDefinition);
-	ItemInstance->SetInventorySlotIndex(EmptySlotIndex);
-
-	UpdateSlot(ItemInstance, EmptySlotIndex);
-	return ItemInstance;
+	return false;
 }
 
 void UGJHInventoryGridWidget::RemoveItem(const int32 InSlotIndex)
@@ -120,10 +129,58 @@ void UGJHInventoryGridWidget::RemoveItem(const int32 InSlotIndex)
 	{
 		if (UGJHInventoryStatics::IsInCoordinateBounds(InventoryItemWidget->GetSlotIndex(), InSlotIndex, InventoryItemWidget->GetGridSize(), InventoryGridSize.Y))
 		{
-			Items.Remove(*InventoryItemWidget);
+			Items.Remove(InventoryItemWidget);
 			return;
 		}
 	}
+}
+
+UGJHItemInstance* UGJHInventoryGridWidget::CreateItemInstance(TSubclassOf<UGJHItemDefinition> InItemDefinition, const int32 InSlotIndex, const int32 InStack)
+{
+	UGJHItemInstance* ItemInstance = NewObject<UGJHItemInstance>(InventoryComponent->GetOwner());
+	ItemInstance->SetItemDefinition(InItemDefinition);
+	ItemInstance->SetInventorySlotIndex(InSlotIndex);
+	ItemInstance->AddStack(InStack);
+
+	UpdateSlot(ItemInstance, InSlotIndex);
+
+	return ItemInstance;
+}
+
+void UGJHInventoryGridWidget::AddStackableItem(TSubclassOf<UGJHItemDefinition> InItemDefinition, const int32 InStack, TArray<TObjectPtr<UGJHItemInstance>>& OutItemInstances)
+{
+	const int32 MaxStack = InItemDefinition->GetDefaultObject<UGJHItemDefinition>()->GetMaxStack();
+	int32 AddStack = InStack;
+
+	while (0 < AddStack)
+	{
+		FGJHInventoryStackableItemResult StackableItemResult;
+		if (FindStackableSlotIndex(InItemDefinition, StackableItemResult))
+		{
+			const int32 Amount = FMath::Min(AddStack, StackableItemResult.Remainder);
+			StackableItemResult.InventoryItemWidget->AddItemStack(Amount);
+			AddStack -= Amount;
+			continue;
+		}
+
+		int32 EmptySlotIndex = -1;
+		if (FindEmptySlotIndex(InItemDefinition, EmptySlotIndex) == false)
+			break;
+
+		const int32 Amount = FMath::Min(AddStack, MaxStack);
+		AddStack -= Amount;
+		OutItemInstances.Add(CreateItemInstance(InItemDefinition, EmptySlotIndex, Amount));
+	}
+}
+
+UGJHItemInstance* UGJHInventoryGridWidget::AddEquipmentItem(TSubclassOf<UGJHItemDefinition> InItemDefinition)
+{
+	int32 EmptySlotIndex = -1;
+	
+	if (FindEmptySlotIndex(InItemDefinition, EmptySlotIndex) == false)
+		return nullptr;
+	
+	return CreateItemInstance(InItemDefinition, EmptySlotIndex, 1);
 }
 
 bool UGJHInventoryGridWidget::IsSlotEmpty(const int32 InSlotIndex, const FIntPoint& InItemGridSize) const
@@ -264,6 +321,9 @@ void UGJHInventoryGridWidget::UpdateDraggedSlotWidget()
 {
 	const FIntPoint ItemGridSize = PickupInventoryItemWidget->GetGridSize();
 
+	if (DraggedSlotIndex != -1)
+		int a = 0;
+
 	const FGJHDraggedInventoryItemResult DraggedInventoryItemResult = GetDraggedInventoryItemResult(DraggedSlotIndex, ItemGridSize);
 	if (LastDraggedStartSlotIndex != DraggedInventoryItemResult.StartSlotIndex)
 	{
@@ -276,7 +336,7 @@ void UGJHInventoryGridWidget::UpdateDraggedSlotWidget()
 
 	if (DraggedSlotIndex == -1)
 		return;
-	
+
 	UGJHInventoryStatics::ForeachSlots(Slots, DraggedInventoryItemResult.StartSlotIndex, ItemGridSize, InventoryGridSize.Y, [&DraggedInventoryItemResult](UGJHInventorySlotWidget* SlotWidget) -> bool
 	{
 		SlotWidget->UpdateDraggedSlotColor(DraggedInventoryItemResult);
@@ -319,11 +379,6 @@ void UGJHInventoryGridWidget::UpdateSlot(UGJHItemInstance* InItemInstance, const
 	Items.Add(ItemWidget);
 }
 
-void UGJHInventoryGridWidget::RestorePickupItemToPrevSlot(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget)
-{
-	UpdateSlot(InPickupInventoryItemWidget->GetItemInstance(), InPickupInventoryItemWidget->GetPrevSlotIndex());
-}
-
 void UGJHInventoryGridWidget::ClearPickupInventoryWidget(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget, int32 SlotIndex)
 {
 	const UGJHItemDefinition* ItemDefinition = InPickupInventoryItemWidget->GetItemInstance()->GetItemDefinition();
@@ -343,7 +398,7 @@ void UGJHInventoryGridWidget::ClearPickupInventoryWidget(UGJHPickupInventoryItem
 
 void UGJHInventoryGridWidget::SwapPickupItem(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget, int32 SlotIndex)
 {
-	OnItemPickup(GetInventoryItemWidgetBySlotIndex(SlotIndex));
+	OnItemPickup(GetInventoryItemWidgetBySlotIndex(SlotIndex), false);
 	UpdateSlot(InPickupInventoryItemWidget->GetItemInstance(), SlotIndex);
 }
 
@@ -371,9 +426,9 @@ void UGJHInventoryGridWidget::CreatePickupInventoryItemWidget(UGJHInventoryItemW
 	PickupInventoryItemWidget->SetItemInstance(InInventoryItemWidget->GetItemInstance());
 }
 
-bool UGJHInventoryGridWidget::IsDragged() const
+bool UGJHInventoryGridWidget::IsDraggedPickupItem() const
 {
-	return PickupInventoryItemWidget.IsValid();
+	return PickupInventoryItemWidget.IsValid() && bDraggedPickupItem;
 }
 
 void UGJHInventoryGridWidget::SetParentWidget(UGJHInventoryWidget* InParentInventoryWidget)
@@ -381,7 +436,7 @@ void UGJHInventoryGridWidget::SetParentWidget(UGJHInventoryWidget* InParentInven
 	ParentInventoryWidget = InParentInventoryWidget;
 }
 
-void UGJHInventoryGridWidget::OnItemPickup(UGJHInventoryItemWidget* InInventoryItemWidget)
+void UGJHInventoryGridWidget::OnItemPickup(UGJHInventoryItemWidget* InInventoryItemWidget, bool bIsDrag)
 {	
 	CreatePickupInventoryItemWidget(InInventoryItemWidget);
 	if (PickupInventoryItemWidget.IsValid() == false)
@@ -404,6 +459,8 @@ void UGJHInventoryGridWidget::OnItemPickup(UGJHInventoryItemWidget* InInventoryI
 	OnChangedDragState.Broadcast(true);
 
 	ParentInventoryWidget->PickupItem(PickupInventoryItemWidget.Get());
+	
+	bDraggedPickupItem = true;
 }
 
 void UGJHInventoryGridWidget::OnDropPickupInventoryItem(UGJHInventorySlotWidget* InventorySlotWidget)
@@ -418,8 +475,49 @@ void UGJHInventoryGridWidget::OnDropPickupInventoryItem(UGJHInventorySlotWidget*
 	}
 	else if (DraggedInventoryItemResult.OverlappedItemCount == 1)
 	{
-		InventoryComponent->UpdateItemSlotIndex(PickupInventoryItemWidget->GetItemInstance(), LastDraggedStartSlotIndex);
-		SwapPickupItem(PickupInventoryItemWidget.Get(), DraggedInventoryItemResult.StartSlotIndex);
+		if (PickupInventoryItemWidget->IsStackable())
+		{
+			if (PickupInventoryItemWidget->GetItemDefinition() == InventorySlotWidget->GetItemDefinition())
+			{
+				const int32 Remainder = InventorySlotWidget->GetStackRemainder();
+				if (Remainder <= 0)
+					return;
+				
+				if (Remainder < PickupInventoryItemWidget->GetStack())
+				{
+					PickupInventoryItemWidget->AddStack(-Remainder);
+					GetInventoryItemWidgetBySlotIndex(InventorySlotWidget->GetSlotIndex())->AddStack(Remainder);
+				}
+				else if (PickupInventoryItemWidget->GetStack() <= Remainder)
+				{
+					GetInventoryItemWidgetBySlotIndex(InventorySlotWidget->GetSlotIndex())->AddStack(PickupInventoryItemWidget->GetStack());
+					ClearPickupInventoryWidget(PickupInventoryItemWidget.Get(), LastDraggedStartSlotIndex);
+
+					OnChangedDragState.Broadcast(false);
+				}
+				else
+				{
+					UpdateSlot(PickupInventoryItemWidget->GetItemInstance(), LastDraggedStartSlotIndex);
+					InventoryComponent->UpdateItemSlotIndex(PickupInventoryItemWidget->GetItemInstance(), LastDraggedStartSlotIndex);
+					ClearPickupInventoryWidget(PickupInventoryItemWidget.Get(), LastDraggedStartSlotIndex);
+
+					OnChangedDragState.Broadcast(false);
+				}
+			}
+			else
+			{
+				UpdateSlot(PickupInventoryItemWidget->GetItemInstance(), LastDraggedStartSlotIndex);
+				InventoryComponent->UpdateItemSlotIndex(PickupInventoryItemWidget->GetItemInstance(), LastDraggedStartSlotIndex);
+				ClearPickupInventoryWidget(PickupInventoryItemWidget.Get(), LastDraggedStartSlotIndex);
+				
+				OnChangedDragState.Broadcast(false);
+			}
+		}
+		else
+		{
+			InventoryComponent->UpdateItemSlotIndex(PickupInventoryItemWidget->GetItemInstance(), LastDraggedStartSlotIndex);
+			SwapPickupItem(PickupInventoryItemWidget.Get(), DraggedInventoryItemResult.StartSlotIndex);
+		}
 	}
 	else
 	{
@@ -427,9 +525,9 @@ void UGJHInventoryGridWidget::OnDropPickupInventoryItem(UGJHInventorySlotWidget*
 		InventoryComponent->UpdateItemSlotIndex(PickupInventoryItemWidget->GetItemInstance(), LastDraggedStartSlotIndex);
 		ParentInventoryWidget->DropPickupItem();
 		ClearPickupInventoryWidget(PickupInventoryItemWidget.Get(), LastDraggedStartSlotIndex);
-	}
 
-	OnChangedDragState.Broadcast(false);
+		OnChangedDragState.Broadcast(false);
+	}
 }
 
 void UGJHInventoryGridWidget::OnMouseEnterInventorySlotWidget(UGJHInventorySlotWidget* InventorySlotWidget, int32 SlotIndex)

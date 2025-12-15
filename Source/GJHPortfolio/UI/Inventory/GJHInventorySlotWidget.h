@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GJHInventorySubWidgetBase.h"
 #include "UI/GJHUITypes.h"
-#include "UI/GJHUserWidgetBase.h"
 #include "GJHInventorySlotWidget.generated.h"
 
 class USizeBox;
@@ -14,7 +14,7 @@ DECLARE_DELEGATE_TwoParams(FGJHOnMouseEventInventorySlotWidget, class UGJHInvent
 DECLARE_DELEGATE_OneParam(FGJHOnDropPickupItem, class UGJHInventorySlotWidget* InventorySlotWidget);
 
 UCLASS()
-class GJHPORTFOLIO_API UGJHInventorySlotWidget : public UGJHUserWidgetBase
+class GJHPORTFOLIO_API UGJHInventorySlotWidget : public UGJHInventorySubWidgetBase
 {
 	GENERATED_BODY()
 
@@ -26,27 +26,9 @@ private:
 	TObjectPtr<UBorder> Border_Slot;
 	
 private:
-	UPROPERTY(EditAnywhere, Category = "GJH|Color")
-	FLinearColor DefaultColor = FLinearColor(0.f, 0.f, 0.f, 0.f);
-	
-	UPROPERTY(EditAnywhere, Category = "GJH|Color")
-	FLinearColor HoveredColor = FLinearColor(0.43f, 0.87f, 0.036f, 0.75f);
-
-	UPROPERTY(EditAnywhere, Category = "GJH|Color")
-	FLinearColor DragEmptyPlacementColor = FLinearColor(0.43f, 0.87f, 0.036f, 0.75f);
-	
-	UPROPERTY(EditAnywhere, Category = "GJH|Color")
-	FLinearColor DragValidPlacementColor = FLinearColor(0.87f, 0.56f, 0.063f, 0.75f);
-
-	UPROPERTY(EditAnywhere, Category = "GJH|Color")
-	FLinearColor DragInvalidPlacementColor = FLinearColor(1.f, 0.03f, 0.04f, 0.75f);
-	
-private:
-	int32 SlotIndex = -1;
 	TWeakObjectPtr<UGJHInventoryGridWidget> ParentGridWidget;
 
-	int32 LeftTopIndex = -1;
-	TWeakObjectPtr<UGJHItemInstance> ItemInstance;
+	bool bMouseButtonDown = false;
 
 public:
 	FGJHOnMouseEventInventorySlotWidget OnMouseEnterInventorySlotWidget; 
@@ -65,16 +47,7 @@ public:
 public:
 	void SetSlotDefaultColor();
 	void UpdateDraggedSlotColor(const FGJHDraggedInventoryItemResult InDraggedInventoryItemResult) const;
-
-public:
-	FORCEINLINE void SetLeftTopIndex(const int32 InLeftTopIndex) { LeftTopIndex = InLeftTopIndex; };
-	FORCEINLINE void SetItemInstance(UGJHItemInstance* InItemInstance) { ItemInstance = InItemInstance; }
 	
 public:
-	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
-	FORCEINLINE int32 GetLeftTopIndex() const { return LeftTopIndex; }
-	FORCEINLINE UGJHItemInstance* GetItemInstance() const { return ItemInstance.Get(); }
 	FVector2D GetSize() const;
-	
-	bool IsValidItem() const;
 };

@@ -1,9 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UI/GJHUserWidgetBase.h"
+#include "GJHInventorySubWidgetBase.h"
+#include "Item/Definition/GJHItemInstance.h"
 #include "GJHInventoryItemWidget.generated.h"
 
+class UGJHItemDefinition;
 class UGJHPickupInventoryItemWidget;
 class UGJHInventoryGridWidget;
 class USizeBox;
@@ -12,10 +14,10 @@ class UTextBlock;
 class UImage;
 class UGJHItemInstance;
 
-DECLARE_DELEGATE_OneParam(FGJHOnItemPickup, class UGJHInventoryItemWidget* InventoryItemWidget);
+DECLARE_DELEGATE_TwoParams(FGJHOnItemPickup, class UGJHInventoryItemWidget* InventoryItemWidget, bool bIsDrag);
 
 UCLASS()
-class GJHPORTFOLIO_API UGJHInventoryItemWidget : public UGJHUserWidgetBase
+class GJHPORTFOLIO_API UGJHInventoryItemWidget : public UGJHInventorySubWidgetBase
 {
 	GENERATED_BODY()
 
@@ -32,25 +34,10 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UBorder> Border_Slot;
 
-private:
-	UPROPERTY(EditAnywhere, Category = "GJH|Color")
-	FLinearColor DefaultColor = FLinearColor(0.5f, 0.5f, 0.5f, 0.1f);
-	
-	UPROPERTY(EditAnywhere, Category = "GJH|Color")
-	FLinearColor HoveredColor = FLinearColor(0.43f, 0.87f, 0.036f, 0.75f);
-
-	UPROPERTY(EditAnywhere, Category = "GJH|Color")
-	FLinearColor DragValidPlacementColor = FLinearColor(0.87f, 0.56f, 0.063f, 0.75f);
-
-	UPROPERTY(EditAnywhere, Category = "GJH|Color")
-	FLinearColor DragInvalidPlacementColor = FLinearColor(1.f, 0.03f, 0.04f, 0.75f);
-
 public:
 	FGJHOnItemPickup OnItemPickup;
 	
 private:	
-	TWeakObjectPtr<UGJHItemInstance> ItemInstance;
-	int32 SlotIndex = -1;
 	TWeakObjectPtr<UGJHInventoryGridWidget> ParentGridWidget;
 
 	bool bMouseButtonDown = false;
@@ -61,22 +48,21 @@ public:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 
 private:
-	void PickupItem();
+	void PickupItem(bool bInDrag);
 	
 public:
-	void SetItemInstance(UGJHItemInstance* InItemInstance);
+	virtual void AddStack(const int32 InAddStack) override;
+	
+	virtual void SetItemInstance(UGJHItemInstance* InItemInstance) override;
 	void SetGridWidget(UGJHInventoryGridWidget* InGridWidget);
-	FORCEINLINE void SetSlotIndex(const int32 InSlotIndex) { SlotIndex = InSlotIndex; }
+
+	void AddItemStack(const int32 InAddStack) const;
 	
 public:
-	UGJHItemInstance* GetItemInstance() const { return ItemInstance.Get(); }
-	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
-	FIntPoint GetGridSize() const;
-	UTexture2D* GetItemIcon() const;
 	float GetWidthOverride() const;
 	float GetHeightOverride() const;
 

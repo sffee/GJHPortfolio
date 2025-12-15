@@ -35,7 +35,7 @@ FReply UGJHInventoryItemWidget::NativeOnMouseButtonUp(const FGeometry& InGeometr
 	if (bMouseButtonDown)
 	{
 		bMouseButtonDown = false;
-		PickupItem();
+		PickupItem(false);
 	}
 
 	return FReply::Handled();
@@ -46,15 +46,9 @@ void UGJHInventoryItemWidget::NativeOnMouseEnter(const FGeometry& InGeometry, co
 	Border_Slot->SetBrushColor(HoveredColor);
 }
 
-FReply UGJHInventoryItemWidget::NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+void UGJHInventoryItemWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {
-	if (bMouseButtonDown)
-	{
-		bMouseButtonDown = false;
-		PickupItem();
-	}
-	
-	return FReply::Handled();
+	PickupItem(true);
 }
 
 void UGJHInventoryItemWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
@@ -62,14 +56,22 @@ void UGJHInventoryItemWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEve
 	Border_Slot->SetBrushColor(DefaultColor);
 }
 
-void UGJHInventoryItemWidget::PickupItem()
+void UGJHInventoryItemWidget::PickupItem(bool bInDrag)
 {
-	OnItemPickup.ExecuteIfBound(this);
+	OnItemPickup.ExecuteIfBound(this, bInDrag);
+}
+
+void UGJHInventoryItemWidget::AddStack(const int32 InAddStack)
+{
+	Super::AddStack(InAddStack);
+
+	TextBlock_Quantity->SetText(FText::AsNumber(ItemInstance->GetStack()));
 }
 
 void UGJHInventoryItemWidget::SetItemInstance(UGJHItemInstance* InItemInstance)
 {
-	ItemInstance = InItemInstance;
+	Super::SetItemInstance(InItemInstance);
+	
 	if (ItemInstance.IsValid() == false)
 		return;
 
@@ -79,7 +81,9 @@ void UGJHInventoryItemWidget::SetItemInstance(UGJHItemInstance* InItemInstance)
 
 	Image_ItemIcon->SetBrushFromTexture(ItemIcon);
 
-	TextBlock_Quantity->SetVisibility(ESlateVisibility::Hidden);
+	TextBlock_Quantity->SetVisibility(InItemInstance->IsStackable() ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+	TextBlock_Quantity->SetText(FText::AsNumber(InItemInstance->GetStack()));
+	
 	Border_Slot->SetBrushColor(DefaultColor);
 }
 
@@ -89,14 +93,10 @@ void UGJHInventoryItemWidget::SetGridWidget(UGJHInventoryGridWidget* InGridWidge
 	ParentGridWidget->OnChangedDragState.AddUObject(this, &ThisClass::OnChangedDragState);
 }
 
-FIntPoint UGJHInventoryItemWidget::GetGridSize() const
+void UGJHInventoryItemWidget::AddItemStack(const int32 InAddStack) const
 {
-	return ItemInstance.IsValid() ? ItemInstance->GetItemDefinition()->GetGridSize() : FIntPoint::ZeroValue;
-}
-
-UTexture2D* UGJHInventoryItemWidget::GetItemIcon() const
-{
-	return Cast<UTexture2D>(Image_ItemIcon->GetBrush().GetResourceObject());
+	ItemInstance->AddStack(InAddStack);
+	TextBlock_Quantity->SetText(FText::AsNumber(ItemInstance->GetStack()));
 }
 
 float UGJHInventoryItemWidget::GetWidthOverride() const

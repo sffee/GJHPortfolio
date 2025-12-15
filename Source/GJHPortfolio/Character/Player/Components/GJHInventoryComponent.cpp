@@ -18,27 +18,31 @@ void UGJHInventoryComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-UGJHItemInstance* UGJHInventoryComponent::AddItem(const int32 InItemIndex)
+void UGJHInventoryComponent::AddItem(const int32 InItemIndex, const int32 InStack)
 {
 	TSubclassOf<UGJHItemDefinition> ItemDefinition = UGJHDataStatics::GetItemDefinition(this, InItemIndex);
 	if (ItemDefinition == nullptr)
 	{
 		ensure(false);
-		return nullptr;
+		return;
 	}
 
 	UGJHInventoryWidget* InventoryWidget = UGJHUISubSystem::Get(this)->GetWidget<UGJHInventoryWidget>(FGJHGameplayTag::UI_Type_Inventory());
 	UGJHInventoryGridWidget* GridWidget = IsValid(InventoryWidget) ? InventoryWidget->GetGridWidget() : nullptr;
 	if (IsValid(GridWidget) == false)
-		return nullptr;
+		return;
 
-	if (UGJHItemInstance* AddedItemInstance = GridWidget->AddItem(ItemDefinition); IsValid(AddedItemInstance))
+	if (ItemDefinition->GetDefaultObject<UGJHItemDefinition>()->IsStackable())
 	{
-		ItemInstances.Add(AddedItemInstance);
-		return AddedItemInstance;
+		GridWidget->AddStackableItem(ItemDefinition, InStack, ItemInstances);
 	}
-
-	return nullptr;
+	else
+	{
+		if (UGJHItemInstance* AddedItemInstance = GridWidget->AddEquipmentItem(ItemDefinition); IsValid(AddedItemInstance))
+		{
+			ItemInstances.Add(AddedItemInstance);
+		}
+	}
 }
 
 void UGJHInventoryComponent::UpdateItemSlotIndex(UGJHItemInstance* InItemInstance, const int32 InNewSlotIndex)

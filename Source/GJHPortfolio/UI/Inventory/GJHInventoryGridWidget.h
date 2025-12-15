@@ -49,6 +49,7 @@ private:
 	TWeakObjectPtr<UGJHPickupInventoryItemWidget> PickupInventoryItemWidget;
 	int32 DraggedSlotIndex = -1;
 	int32 LastDraggedStartSlotIndex = -1;
+	bool bDraggedPickupItem = false;
 
 public:
 	virtual void NativeConstruct() override;
@@ -58,10 +59,16 @@ public:
 
 public:
 	bool FindEmptySlotIndex(TSubclassOf<UGJHItemDefinition> InItemDefinition, int32& OutSlotIndex);
+	bool FindStackableSlotIndex(TSubclassOf<UGJHItemDefinition> InItemDefinition, FGJHInventoryStackableItemResult& OutStackableItemResult);
+
+	void AddStackableItem(TSubclassOf<UGJHItemDefinition> InItemDefinition, const int32 InStack, TArray<TObjectPtr<UGJHItemInstance>>& OutItemInstances);
+	UGJHItemInstance* AddEquipmentItem(TSubclassOf<UGJHItemDefinition> InItemDefinition);
 	
-	UGJHItemInstance* AddItem(TSubclassOf<UGJHItemDefinition> InItemDefinition);
 	void RemoveItem(const int32 InSlotIndex);
 
+private:
+	UGJHItemInstance* CreateItemInstance(TSubclassOf<UGJHItemDefinition> InItemDefinition, const int32 InSlotIndex, const int32 InStack);
+	
 private:
 	bool IsSlotEmpty(const int32 InSlotIndex, const FIntPoint& InItemGridSize) const;
 	bool IsInGridBounds(const int32 InSlotIndex, const FIntPoint& InItemGridSize) const;
@@ -76,21 +83,19 @@ private:
 	void UpdateDraggedSlotWidget();
 	void UpdateSlot(UGJHItemInstance* InItemInstance, const int32 InSlotIndex);
 
-	void PickupItem(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget, int32 SlotIndex);
-	void RestorePickupItemToPrevSlot(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget);
 	void ClearPickupInventoryWidget(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget, int32 SlotIndex);
 	void SwapPickupItem(UGJHPickupInventoryItemWidget* InPickupInventoryItemWidget, int32 SlotIndex);
 
 	void CreatePickupInventoryItemWidget(UGJHInventoryItemWidget* InInventoryItemWidget);
 
 public:
-	bool IsDragged() const;
+	bool IsDraggedPickupItem() const;
 
 public:
 	void SetParentWidget(UGJHInventoryWidget* InParentInventoryWidget);
 	
 private:
-	void OnItemPickup(UGJHInventoryItemWidget* InInventoryItemWidget);
+	void OnItemPickup(UGJHInventoryItemWidget* InInventoryItemWidget, bool bIsDrag);
 	void OnDropPickupInventoryItem(UGJHInventorySlotWidget* InventorySlotWidget);
 	void OnMouseEnterInventorySlotWidget(UGJHInventorySlotWidget* InventorySlotWidget, int32 SlotIndex);
 	void OnMouseLeaveInventorySlotWidget(UGJHInventorySlotWidget* InventorySlotWidget, int32 SlotIndex);

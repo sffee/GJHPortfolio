@@ -24,6 +24,11 @@ void UGJHInventorySlotWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEve
 
 FReply UGJHInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
+	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		bMouseButtonDown = true;
+	}
+	
 	return FReply::Handled();
 }
 
@@ -31,7 +36,11 @@ FReply UGJHInventorySlotWidget::NativeOnMouseButtonUp(const FGeometry& InGeometr
 {
 	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		OnDropPickupInventoryItem.ExecuteIfBound(this);
+		if (bMouseButtonDown || ParentGridWidget->IsDraggedPickupItem())
+		{
+			bMouseButtonDown = false;
+			OnDropPickupInventoryItem.ExecuteIfBound(this);
+		}
 	}
 	
 	return FReply::Handled();
@@ -74,9 +83,4 @@ void UGJHInventorySlotWidget::UpdateDraggedSlotColor(const FGJHDraggedInventoryI
 FVector2D UGJHInventorySlotWidget::GetSize() const
 {
 	return FVector2D(SizeBox_Root->GetWidthOverride(), SizeBox_Root->GetHeightOverride());
-}
-
-bool UGJHInventorySlotWidget::IsValidItem() const
-{
-	return IsValid(ItemInstance.Get()) && SlotIndex != INVALID_ITEM_INDEX && LeftTopIndex != INVALID_ITEM_INDEX;
 }

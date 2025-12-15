@@ -12,11 +12,16 @@ bool UGJHItemInstance::CanAddToStack(const int32 InAddStack) const
 	return true;
 }
 
-void UGJHItemInstance::AddToStack(const int32 InAddStack)
+void UGJHItemInstance::AddStack(const int32 InAddStack)
 {
 	if (ItemDefinition == nullptr)
 		return;
 
 	const int32 MaxStack = ItemDefinition->GetDefaultObject<UGJHItemDefinition>()->GetMaxStack();
 	Stack = FMath::Clamp(Stack + InAddStack, 0, MaxStack);
+}
+
+bool UGJHItemInstance::IsStackable() const
+{
+	return GetItemDefinition()->IsStackable();
 }

@@ -26,7 +26,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	UGJHItemInstance* AddItem(const int32 InItemIndex);
+	void AddItem(const int32 InItemIndex, const int32 InStack = 1);
 	void UpdateItemSlotIndex(UGJHItemInstance* InItemInstance, const int32 InNewSlotIndex);
 	
 public:
