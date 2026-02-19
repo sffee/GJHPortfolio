@@ -5,6 +5,7 @@
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
 #include "AbilitySystem/AbilityTask/GJHAbilityTask_PlayMontageAndWaitForEvent.h"
+#include "AbilitySystem/AbilityTask/GJHAbilityTask_SweepAttack.h"
 #include "GameplayTag/GJHGameplayTag.h"
 
 UGJHGA_BasicAttack::UGJHGA_BasicAttack()
@@ -72,7 +73,7 @@ void UGJHGA_BasicAttack::SetNextAnimMontageSection()
 	bInputAvailable = false;
 	HitActors.Empty();
 
-	if (IsValid(PlayMontageAndWaitForEvent))
+	if (PlayMontageAndWaitForEvent)
 	{
 		PlayMontageAndWaitForEvent->EndTask();
 		PlayMontageAndWaitForEvent = nullptr;
@@ -81,9 +82,11 @@ void UGJHGA_BasicAttack::SetNextAnimMontageSection()
 	FGameplayTagContainer TagContainer;
 	TagContainer.AddTag(FGJHGameplayTag::Ability_Event_InputAvailable());
 	TagContainer.AddTag(FGJHGameplayTag::Ability_Event_SendTargetData());
+	TagContainer.AddTag(FGJHGameplayTag::Ability_Event_StartAttack());
+	TagContainer.AddTag(FGJHGameplayTag::Ability_Event_EndAttack());
 
 	PlayMontageAndWaitForEvent = UGJHAbilityTask_PlayMontageAndWaitForEvent::PlayMontageAndWaitForEvent(this, AnimMontage, TagContainer, 1.f, NextAnimMontageSectionName);
-	if (IsValid(PlayMontageAndWaitForEvent))
+	if (PlayMontageAndWaitForEvent)
 	{
 		PlayMontageAndWaitForEvent->OnBlendOut.AddDynamic(this, &UGJHGA_BasicAttack::OnEndMontage);
 		PlayMontageAndWaitForEvent->OnCancelled.AddDynamic(this, &UGJHGA_BasicAttack::OnEndMontage);
@@ -93,6 +96,11 @@ void UGJHGA_BasicAttack::SetNextAnimMontageSection()
 		
 		PlayMontageAndWaitForEvent->ReadyForActivation();
 	}
+}
+
+FName UGJHGA_BasicAttack::GetCurrentAnimMontageSectionName()
+{
+	return AnimMontageSectionNames[CurrentComboIndex];
 }
 
 FName UGJHGA_BasicAttack::GetNextAnimMontageSectionName()
@@ -106,15 +114,66 @@ void UGJHGA_BasicAttack::ApplyDamageToTarget(const FGameplayEventData& InEventDa
 	for (int32 i = 0; i < InEventData.TargetData.Num(); ++i)
 	{
 		const FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(InEventData.TargetData, i);
-		AActor* HitActor = HitResult.GetActor();
-
-		if (HitActors.Contains(HitActor))
-			continue;
-
-		HitActors.Add(HitActor);
-
-		ApplyDamage(GetDamage(CurrentComboIndex + 1), HitActor, CurrentComboIndex + 1);
+		ApplyDamageToTarget(HitResult);
 	}
+}
+
+void UGJHGA_BasicAttack::ApplyDamageToTarget(const TArray<FHitResult>& InHitResults)
+{
+	for (const FHitResult& HitResult : InHitResults)
+	{
+		ApplyDamageToTarget(HitResult);
+	}
+}
+
+void UGJHGA_BasicAttack::ApplyDamageToTarget(const FHitResult& InHitResult)
+{
+	AActor* HitActor = InHitResult.GetActor();
+
+	if (HitActors.Contains(HitActor))
+		return;
+
+	HitActors.Add(HitActor);
+
+	ApplyDamage(GetDamage(CurrentComboIndex + 1), HitActor, CurrentComboIndex + 1);
+}
+
+void UGJHGA_BasicAttack::StartSweepAttack(float InTotalDuration)
+{
+	if (HasAuthority(&CurrentActivationInfo) == false)
+		return;
+	
+	if (IsValid(SweepAttack))
+		return;
+	
+	const float MontagePosition = GetOwningComponentFromActorInfo()->GetAnimInstance()->Montage_GetPosition(AnimMontage);
+	
+	SweepAttack = UGJHAbilityTask_SweepAttack::SweepAttack(
+		this,
+		AnimMontage,
+		GetCurrentAnimMontageSectionName(),
+		MontagePosition,
+		InTotalDuration,
+		TraceRadius,
+		TraceInterval,
+		TraceStartSocketName,
+		TraceEndSocketName,
+		bDrawDebug ? DrawDebugTime : 0.f);
+	
+	SweepAttack->OnTraceHit.BindUObject(this, &UGJHGA_BasicAttack::OnTraceHit);
+	SweepAttack->ReadyForActivation();
+}
+
+void UGJHGA_BasicAttack::EndSweepAttack()
+{
+	if (HasAuthority(&CurrentActivationInfo) == false)
+		return;
+	
+	if (IsValid(SweepAttack) == false)
+		return;
+	
+	SweepAttack->EndTask();
+	SweepAttack = nullptr;
 }
 
 void UGJHGA_BasicAttack::OnEndMontage()
@@ -132,4 +191,17 @@ void UGJHGA_BasicAttack::OnReceiveGameplayEvent(FGameplayEventData EventData)
 	{
 		ApplyDamageToTarget(EventData);
 	}
+	else if (EventData.EventTag.MatchesTag(FGJHGameplayTag::Ability_Event_StartAttack()))
+	{
+		StartSweepAttack(EventData.EventMagnitude);
+	}
+	else if (EventData.EventTag.MatchesTag(FGJHGameplayTag::Ability_Event_EndAttack()))
+	{
+		EndSweepAttack();
+	}
+}
+
+void UGJHGA_BasicAttack::OnTraceHit(const TArray<FHitResult> HitResults)
+{
+	ApplyDamageToTarget(HitResults);
 }

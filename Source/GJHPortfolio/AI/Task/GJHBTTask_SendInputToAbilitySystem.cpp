@@ -10,6 +10,8 @@
 UGJHBTTask_SendInputToAbilitySystem::UGJHBTTask_SendInputToAbilitySystem()
 {
 	bNotifyTick = true;
+	
+	bCreateNodeInstance = true;
 }
 
 EBTNodeResult::Type UGJHBTTask_SendInputToAbilitySystem::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

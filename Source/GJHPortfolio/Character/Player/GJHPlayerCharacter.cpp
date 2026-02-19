@@ -28,14 +28,20 @@ void AGJHPlayerCharacter::BeginPlay()
 void AGJHPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
 }
 
 void AGJHPlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	InitAbilitySystem();	
+	InitAbilitySystem();
+}
+
+void AGJHPlayerCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	
+	InitAbilitySystem();
 }
 
 void AGJHPlayerCharacter::InitAbilitySystem()

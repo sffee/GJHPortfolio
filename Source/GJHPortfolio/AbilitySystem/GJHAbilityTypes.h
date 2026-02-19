@@ -18,7 +18,7 @@ private:
 public:
 	virtual UScriptStruct* GetScriptStruct() const
 	{
-		return FGJHGameplayEffectContext::StaticStruct();
+		return FGameplayEffectContext::StaticStruct();
 	}
 
 	/** Creates a copy of this context, used to duplicate for later modifications */
@@ -33,6 +33,8 @@ public:
 		}
 		return NewContext;
 	}
+	
+	virtual bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess);
 
 public:
 	FORCEINLINE void SetKnockBackImpulse(const FVector& InKnockBackImpulse) { KnockBackImpulse = InKnockBackImpulse; }
@@ -47,6 +49,7 @@ struct TStructOpsTypeTraits<FGJHGameplayEffectContext> : public TStructOpsTypeTr
 {
 	enum
 	{
+		WithNetSerializer = true,
 		WithCopy = true
 	};
 };

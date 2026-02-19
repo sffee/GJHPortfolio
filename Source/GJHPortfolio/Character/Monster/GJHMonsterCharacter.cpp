@@ -10,11 +10,15 @@
 AGJHMonsterCharacter::AGJHMonsterCharacter()
 {
 	AbilitySystemComponent = CreateDefaultSubobject<UGJHAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+	
 	AttributeSet = CreateDefaultSubobject<UGJHCharacterAttributeSet>(TEXT("AttributeSet"));
 	
 	OverHeadWidgetComponent = CreateDefaultSubobject<UGJHOverHeadWidgetComponent>(TEXT("OverHeadWidgetComponent"));
 	OverHeadWidgetComponent->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 	OverHeadWidgetComponent->SetupAttachment(GetMesh());
+	
+	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
 }
 
 void AGJHMonsterCharacter::BeginPlay()
@@ -44,6 +48,9 @@ void AGJHMonsterCharacter::InitAbilitySystem()
 
 void AGJHMonsterCharacter::InitOverHeadWidgetComponent() const
 {
+	if (GetNetMode() == NM_DedicatedServer)
+		return;
+	
 	UGJHOverHeadStatusWidget* OverHeadStatusWidget = Cast<UGJHOverHeadStatusWidget>(OverHeadWidgetComponent->GetUserWidgetObject());
 	if (IsValid(OverHeadStatusWidget))
 	{

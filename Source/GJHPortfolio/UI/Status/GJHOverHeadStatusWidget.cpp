@@ -34,7 +34,7 @@ void UGJHOverHeadStatusWidget::SetAbilitySystemComponent(UGJHAbilitySystemCompon
 		UpdateHealth();
 		
 		HealthAttributeDelegateHandles = OwningAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UGJHCharacterAttributeSet::GetHealthAttribute()).AddUObject(this, &ThisClass::OnHealthAttributeChanged);
-		MaxHealthAttributeDelegateHandles = OwningAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UGJHCharacterAttributeSet::GetMaxHealthAttribute()).AddUObject(this, &ThisClass::OnHealthAttributeChanged);
+		MaxHealthAttributeDelegateHandles = OwningAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UGJHCharacterAttributeSet::GetMaxHealthAttribute()).AddUObject(this, &ThisClass::OnMaxHealthAttributeChanged);
 	}
 }
 

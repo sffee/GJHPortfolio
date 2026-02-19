@@ -110,7 +110,7 @@ int32 UGJHDataSubSystem::GetSkillIndex(const FGameplayTag& InCharacterTypeTag, c
 
 	for (const auto& [SkillIndex, SkillTableInfo] : SkillInfoMap[InCharacterTypeTag])
 	{
-		if (SkillTableInfo.Ability->GetClass() == InAbility->GetClass())
+		if (SkillTableInfo.Ability && SkillTableInfo.Ability->GetClass() == InAbility->GetClass())
 			return SkillIndex;
 	}
 

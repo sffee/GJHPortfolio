@@ -22,7 +22,7 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UCameraComponent> CameraComponent;
-
+	
 private:
 	UPROPERTY(EditAnywhere, Category = "GJH|Character", meta = (Categories = "Character.Type"))
 	FGameplayTag CharacterTypeTag;
@@ -36,6 +36,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
 
 private:
 	void InitAbilitySystem();

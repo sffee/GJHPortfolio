@@ -32,6 +32,9 @@ public:
 	void AbilityInputPressedByAbilityTag(const FGameplayTag& InAbilityTag);
 	void AbilityInputReleased(const FGameplayTag& InInputTag);
 	void AbilityInputHeld(const FGameplayTag& InInputTag);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_AbilityInputPressed(const FGameplayTag& InInputTag);
 
 public:
 	void AddAbility(const TSubclassOf<UGameplayAbility> InAbility);

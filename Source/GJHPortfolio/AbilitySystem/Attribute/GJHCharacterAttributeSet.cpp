@@ -44,6 +44,16 @@ void UGJHCharacterAttributeSet::PostAttributeChange(const FGameplayAttribute& At
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
 }
 
+void UGJHCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME_CONDITION_NOTIFY(UGJHCharacterAttributeSet, Health, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UGJHCharacterAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UGJHCharacterAttributeSet, Mana, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UGJHCharacterAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
+}
+
 void UGJHCharacterAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& InData, FGJHEffectProperties& OutProperties)
 {
 	OutProperties.EffectContextHandle = InData.EffectSpec.GetContext();
@@ -89,41 +99,13 @@ void UGJHCharacterAttributeSet::HandleIncomingDamage(const FGameplayEffectModCal
 			SendDeathEvent(InGJHEffectProperties);
 
 			ProcessAddXP(InGJHEffectProperties);
-			// ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor);
-			// if (CombatInterface)
-			// {
-			// 	FVector Impulse = UAuraAbilitySystemLibrary::GetDeathImpulse(Props.EffectContextHandle);
-			// 	CombatInterface->Die(UAuraAbilitySystemLibrary::GetDeathImpulse(Props.EffectContextHandle));
-			// }
-			// SendXPEvent(Props);
 		}
 		else
 		{
 			SendHitReactionEvent(InGJHEffectProperties);
-			
-			// if (Props.TargetCharacter->Implements<UCombatInterface>() && !ICombatInterface::Execute_IsBeingShocked(Props.TargetCharacter))
-			// {
-			// 	FGameplayTagContainer TagContainer;
-			// 	TagContainer.AddTag(FAuraGameplayTags::Get().Effects_HitReact);
-			// 	Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
-			// }
-			//
-			// const FVector& KnockbackForce = UAuraAbilitySystemLibrary::GetKnockbackForce(Props.EffectContextHandle);
-			// if (!KnockbackForce.IsNearlyZero(1.f))
-			// {
-			// 	Props.TargetCharacter->LaunchCharacter(KnockbackForce, true, true);
-			// }
 		}
 
 		CreateDamageText(Damage, InGJHEffectProperties);
-			
-		// const bool bBlock = UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
-		// const bool bCriticalHit = UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
-		// ShowFloatingText(Props, LocalIncomingDamage, bBlock, bCriticalHit);
-		// if (UAuraAbilitySystemLibrary::IsSuccessfulDebuff(Props.EffectContextHandle))
-		// {
-		// 	Debuff(Props);
-		// }
 	}
 }
 
@@ -170,6 +152,26 @@ void UGJHCharacterAttributeSet::CreateDamageText(float InDamage, const FGJHEffec
 	if (InGJHEffectProperties.SourceCharacter != InGJHEffectProperties.TargetCharacter)
 	{
 		if (AGJHPlayerController* PlayerController = Cast<AGJHPlayerController>(InGJHEffectProperties.SourceCharacter->Controller))
-			PlayerController->CreateDamageText(InGJHEffectProperties.TargetAvatarActor, InDamage);
+			PlayerController->Client_CreateDamageText(InGJHEffectProperties.TargetAvatarActor, InDamage);
 	}
+}
+
+void UGJHCharacterAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGJHCharacterAttributeSet, Health, OldHealth);
+}
+
+void UGJHCharacterAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGJHCharacterAttributeSet, MaxHealth, OldMaxHealth);
+}
+
+void UGJHCharacterAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldMana) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGJHCharacterAttributeSet, Mana, OldMana);
+}
+
+void UGJHCharacterAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGJHCharacterAttributeSet, MaxMana, OldMaxMana);
 }

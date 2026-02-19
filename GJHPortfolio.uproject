@@ -8,7 +8,12 @@
 			"Name": "GJHPortfolio",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
-		}
+		},
+        {
+          "Name": "GJHPortfolioEditor",
+          "Type": "Editor",
+          "LoadingPhase": "PreDefault"
+        }
 	],
 	"Plugins": [
 		{

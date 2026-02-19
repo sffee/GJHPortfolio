@@ -10,6 +10,8 @@
 UGJHAbilitySystemComponent::UGJHAbilitySystemComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	
+	SetIsReplicatedByDefault(true);
 }
 
 void UGJHAbilitySystemComponent::BeginPlay()
@@ -32,9 +34,16 @@ void UGJHAbilitySystemComponent::AbilityInputPressed(const FGameplayTag& InInput
 		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InInputTag))
 		{
 			if (AbilitySpec.IsActive())
+			{
 				AbilitySpecInputPressed(AbilitySpec);
+				
+				if (GetNetMode() == NM_Client)
+					Server_AbilityInputPressed(InInputTag);
+			}
 			else
+			{
 				TryActivateAbility(AbilitySpec.Handle);
+			}
 		}
 	}
 }
@@ -82,6 +91,11 @@ void UGJHAbilitySystemComponent::AbilityInputHeld(const FGameplayTag& InInputTag
 				TryActivateAbility(AbilitySpec.Handle);
 		}
 	}
+}
+
+void UGJHAbilitySystemComponent::Server_AbilityInputPressed_Implementation(const FGameplayTag& InInputTag)
+{
+	AbilityInputPressed(InInputTag);
 }
 
 void UGJHAbilitySystemComponent::AddAbility(const TSubclassOf<UGameplayAbility> InAbility)

@@ -19,7 +19,7 @@ AGJHPlayerController::AGJHPlayerController()
 void AGJHPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	InitHUDWidget();
 }
 
@@ -43,6 +43,9 @@ void AGJHPlayerController::SetupInputComponent()
 
 void AGJHPlayerController::InitHUDWidget() const
 {
+	if (GetNetMode() == NM_DedicatedServer)
+		return;
+	
 	UGJHUISubSystem* UISubSystem = UGJHUISubSystem::Get(this);
 	if (IsValid(UISubSystem) == false)
 		return;
@@ -138,7 +141,7 @@ void AGJHPlayerController::Input_Inventory(const FInputActionValue& Value)
 	InventoryComponent->AddItem(1, 3);
 }
 
-void AGJHPlayerController::CreateDamageText(AActor* InTargetActor, float InDamage) const
+void AGJHPlayerController::Client_CreateDamageText_Implementation(AActor* InTargetActor, float InDamage) const
 {	
 	if (IsValid(DamageTextComponentClass) == false || IsValid(InTargetActor) == false)
 		return;

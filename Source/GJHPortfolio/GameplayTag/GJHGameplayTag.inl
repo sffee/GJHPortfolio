@@ -42,6 +42,8 @@ GJH_GAMEPLAYTAG(Ability_Common_Death, "Ability.Common.Death")
 
 GJH_GAMEPLAYTAG(Ability_Event_InputAvailable, "Ability.Event.InputAvailable")
 GJH_GAMEPLAYTAG(Ability_Event_SendTargetData, "Ability.Event.SendTargetData")
+GJH_GAMEPLAYTAG(Ability_Event_StartAttack, "Ability.Event.StartAttack")
+GJH_GAMEPLAYTAG(Ability_Event_EndAttack, "Ability.Event.EndAttack")
 
 GJH_GAMEPLAYTAG(Ability_SetByCaller_Damage, "Ability.SetByCaller.Damage")
 

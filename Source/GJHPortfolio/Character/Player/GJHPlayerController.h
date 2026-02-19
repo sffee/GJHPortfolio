@@ -53,7 +53,8 @@ private:
 	void Input_Inventory(const FInputActionValue& Value);
 
 public:
-	void CreateDamageText(AActor* InTargetActor, float InDamage) const;
+	UFUNCTION(Client, Reliable)
+	void Client_CreateDamageText(AActor* InTargetActor, float InDamage) const;
 	
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;

@@ -5,6 +5,7 @@
 
 #include "GJHGA_BasicAttack.generated.h"
 
+class UGJHAbilityTask_SweepAttack;
 class UGJHAbilityTask_PlayMontageAndWaitForEvent;
 
 UCLASS()
@@ -18,6 +19,25 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Ability|BasicAttack")
 	TObjectPtr<UAnimMontage> AnimMontage = nullptr;
+	
+	UPROPERTY(EditAnywhere, Category = "Ability|BasicAttack")
+	float TraceRadius = 50.f;
+	
+	UPROPERTY(EditAnywhere, Category = "Ability|BasicAttack")
+	float TraceInterval = 0.1f;
+	
+	UPROPERTY(EditAnywhere, Category = "Ability|BasicAttack")
+	FName TraceStartSocketName;
+	
+	UPROPERTY(EditAnywhere, Category = "Ability|BasicAttack")
+	FName TraceEndSocketName;
+	
+private:
+	UPROPERTY(EditAnywhere, Category = "Ability|BasicAttack|Debug")
+	bool bDrawDebug = false;
+	
+	UPROPERTY(EditAnywhere, Category = "Ability|BasicAttack|Debug")
+	float DrawDebugTime = 1.f;
 
 private:
 	int32 CurrentComboIndex = 1;
@@ -28,6 +48,9 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UGJHAbilityTask_PlayMontageAndWaitForEvent> PlayMontageAndWaitForEvent;
+	
+	UPROPERTY()
+	TObjectPtr<UGJHAbilityTask_SweepAttack> SweepAttack;
 	
 public:
 	UGJHGA_BasicAttack();
@@ -42,10 +65,15 @@ public:
 
 private:
 	void SetNextAnimMontageSection();
+	FName GetCurrentAnimMontageSectionName();
 	FName GetNextAnimMontageSectionName();
 
 private:
 	void ApplyDamageToTarget(const FGameplayEventData& InEventData);
+	void ApplyDamageToTarget(const TArray<FHitResult>& InHitResults);
+	void ApplyDamageToTarget(const FHitResult& InHitResult);
+	void StartSweepAttack(float InTotalDuration);
+	void EndSweepAttack();
 	
 private:
 	UFUNCTION()
@@ -53,4 +81,6 @@ private:
 
 	UFUNCTION()
 	void OnReceiveGameplayEvent(FGameplayEventData EventData);
+	
+	void OnTraceHit(const TArray<FHitResult> HitResults);
 };

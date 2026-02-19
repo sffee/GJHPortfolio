@@ -10,6 +10,8 @@
 AGJHPlayerState::AGJHPlayerState()
 {
 	AbilitySystemComponent = CreateDefaultSubobject<UGJHAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
+	
 	AttributeSet = CreateDefaultSubobject<UGJHCharacterAttributeSet>(TEXT("AttributeSet"));
 }
 
