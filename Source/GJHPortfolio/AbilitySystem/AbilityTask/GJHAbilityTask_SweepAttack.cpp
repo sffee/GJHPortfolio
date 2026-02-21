@@ -164,21 +164,21 @@ void UGJHAbilityTask_SweepAttack::TraceSocket(const FVector InStartSocketLocatio
 	
 	Trace(InStartSocketLocation, InEndSocketLocation, OutHitResult);
 	
-	// if (LastStartSocketLocation.IsNearlyZero() == false)
-	// {
-	// 	const FVector LastStartLocation = ComponentTransform.TransformPosition(LastStartSocketLocation);
-	// 	
-	// 	Trace(LastStartLocation, InStartSocketLocation, OutHitResult);
-	// 	Trace(LastStartLocation, InEndSocketLocation, OutHitResult);
-	// }
-	//
-	// if (LastEndSocketLocation.IsNearlyZero() == false)
-	// {
-	// 	const FVector LastEndLocation = ComponentTransform.TransformPosition(LastEndSocketLocation);
-	// 	
-	// 	Trace(LastEndLocation, InStartSocketLocation, OutHitResult);
-	// 	Trace(LastEndLocation, InEndSocketLocation, OutHitResult);
-	// }
+	if (LastStartSocketLocation.IsNearlyZero() == false)
+	{
+		const FVector LastStartLocation = ComponentTransform.TransformPosition(LastStartSocketLocation);
+		
+		Trace(LastStartLocation, InStartSocketLocation, OutHitResult);
+		Trace(LastStartLocation, InEndSocketLocation, OutHitResult);
+	}
+	
+	if (LastEndSocketLocation.IsNearlyZero() == false)
+	{
+		const FVector LastEndLocation = ComponentTransform.TransformPosition(LastEndSocketLocation);
+		
+		Trace(LastEndLocation, InStartSocketLocation, OutHitResult);
+		Trace(LastEndLocation, InEndSocketLocation, OutHitResult);
+	}
 }
 
 void UGJHAbilityTask_SweepAttack::Trace(const FVector& InTraceStart, const FVector& InTraceEnd, TArray<FHitResult>& OutHitResult)

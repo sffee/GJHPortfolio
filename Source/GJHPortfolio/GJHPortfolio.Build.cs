@@ -14,11 +14,7 @@ public class GJHPortfolio : ModuleRules
 			"CoreUObject", 
 			"Engine", 
 			"InputCore", 
-			"EnhancedInput"
-		});
-
-		PrivateDependencyModuleNames.AddRange(new string[]
-		{
+			"EnhancedInput",
 			"GameplayAbilities",
 			"GameplayTags",
 			"GameplayTasks",
@@ -30,7 +26,7 @@ public class GJHPortfolio : ModuleRules
 			"SlateCore",
 			"DeveloperSettings"
 		});
-		
+
 		PublicIncludePaths.AddRange(new string[]
 		{
 			"GJHPortfolio"

@@ -5,6 +5,10 @@
 #include "GJHSettings/GJHDataDeveloperSettings.h"
 #include "Library/GJHDataStatics.h"
 
+#if WITH_EDITORONLY_DATA
+TMap<FGameplayTag, TSet<FGJHTableMemo>> UGJHDataSubSystem::TableMemoMap;
+#endif
+
 UGJHDataSubSystem* UGJHDataSubSystem::Get(const UObject* WorldContextObject)
 {
 	if (GEngine)
@@ -135,3 +139,56 @@ FGJHItemTableInfo UGJHDataSubSystem::GetItemInfo(int32 InItemIndex)
 
 	return ItemInfoMap[InItemIndex];
 }
+
+#if WITH_EDITOR
+void UGJHDataSubSystem::GetTableMemo(const FGameplayTag& InTableTag, TSet<FGJHTableMemo>& OutMemos)
+{
+	OutMemos.Reset();
+	
+	if (TSet<FGJHTableMemo>* FoundSet = TableMemoMap.Find(InTableTag))
+	{
+		OutMemos = *FoundSet;
+		return;
+	}
+	
+	UDataTable* DataTable = UGJHDataStatics::GetDataTable(InTableTag);
+	if (IsValid(DataTable) == false || IsValid(DataTable->RowStruct) == false)
+		return;
+	
+	TSet<FGJHTableMemo>& MemoMap = TableMemoMap.Add(InTableTag);
+
+	for (auto It = DataTable->GetRowMap().CreateConstIterator(); It; ++It)
+	{
+		uint8* RowData = It.Value();
+		if (RowData == nullptr)
+			continue;
+
+		FGJHTableMemo TableMemo;
+		
+		for (TFieldIterator<FProperty> PropIt(DataTable->RowStruct); PropIt; ++PropIt)
+		{
+			FProperty* Property = *PropIt;
+
+			if (Property->HasMetaData(TEXT("GJHTableKey")))
+			{
+				if (FIntProperty* IntProp = CastField<FIntProperty>(Property))
+					TableMemo.Index = IntProp->GetPropertyValue_InContainer(RowData);
+			}
+			else if (Property->HasMetaData(TEXT("GJHTableMemo")))
+			{
+				if (FNameProperty* NameProp = CastField<FNameProperty>(Property))
+					TableMemo.Memo = NameProp->GetPropertyValue_InContainer(RowData).ToString();
+			}
+			
+			if (TableMemo.IsValidKey())
+				break;
+		}
+
+		if (TableMemo.IsValidKey())
+		{
+			MemoMap.Add(TableMemo);
+			OutMemos.Add(MoveTemp(TableMemo));
+		}
+	}
+}
+#endif

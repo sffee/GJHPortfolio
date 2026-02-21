@@ -19,7 +19,11 @@ private:
 	TMap<FGameplayTag, FGJHMonsterRewardTableInfo> MonsterRewardInfoMap;
 	TMap<FGameplayTag, TMap<int32, FGJHSkillTableInfo>> SkillInfoMap;
 	TMap<int32, FGJHItemTableInfo> ItemInfoMap;
-
+	
+#if WITH_EDITORONLY_DATA
+	static TMap<FGameplayTag, TSet<FGJHTableMemo>> TableMemoMap;
+#endif
+	
 public:
 	static UGJHDataSubSystem* Get(const UObject* WorldContextObject);
 	
@@ -44,4 +48,8 @@ public:
 
 public:
 	FGJHItemTableInfo GetItemInfo(int32 InItemIndex);
+	
+#if WITH_EDITOR
+	static void GetTableMemo(const FGameplayTag& InTableTag, TSet<FGJHTableMemo>& OutMemos);
+#endif
 };

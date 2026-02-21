@@ -24,7 +24,9 @@ public class GJHPortfolioEditor : ModuleRules
 			"UMG",
 			"Slate",
 			"SlateCore",
-			"UnrealEd"
+			"UnrealEd",
+			"ToolWidgets",
+			"GameplayTags"
 		});
 
 		// Uncomment if you are using Slate UI
