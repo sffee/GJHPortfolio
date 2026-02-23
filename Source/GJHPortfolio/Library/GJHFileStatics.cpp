@@ -29,7 +29,6 @@ void UGJHFileStatics::ForeachFileInDirectory(const FString& InDirectory, TFuncti
 		};
 
 		FFileVisitor Visitor(InFunc);
-		// 4. 폴더 순회 시작
 		PlatformFile.IterateDirectory(*Directory, Visitor);
 	}
 }

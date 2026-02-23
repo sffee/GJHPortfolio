@@ -14,10 +14,10 @@ struct FGJHStatusData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UGameplayEffect> GameplayEffect; 
+	TSoftClassPtr<UGameplayEffect> GameplayEffect; 
 	
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UTexture2D> Icon;
+	TSoftObjectPtr<UTexture2D> Icon;
 };
 
 UCLASS(Config = Game, DefaultConfig, meta = (DisplayName = "GJH Data Settings"))

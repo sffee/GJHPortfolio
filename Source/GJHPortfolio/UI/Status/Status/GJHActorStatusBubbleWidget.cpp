@@ -25,7 +25,7 @@ void UGJHActorStatusBubbleWidget::RefreshStatus(const FGameplayTag& InStatusTag,
 	WrapBox_Bubble->ClearChildren();
 	
 	FGJHStatusData StatusData = UGJHDataStatics::GetStatusData(InStatusTag);
-	UTexture2D* StatusIcon = StatusData.Icon;
+	UTexture2D* StatusIcon = StatusData.Icon.LoadSynchronous();
 	if (IsValid(StatusIcon) == false)
 		return;
 	

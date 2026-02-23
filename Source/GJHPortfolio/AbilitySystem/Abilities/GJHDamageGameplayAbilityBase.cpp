@@ -43,14 +43,14 @@ void UGJHDamageGameplayAbilityBase::ApplyStatusDamage(float InDuration, AActor* 
 		return;
 	
 	FGJHStatusData StatusData = UGJHDataStatics::GetStatusData(InStatusTag);
-	if (StatusData.GameplayEffect == nullptr)
+	if (StatusData.GameplayEffect.IsNull())
 		return;
 
 	UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
 	if (IsValid(ASC) == false)
 		return;
 
-	FGameplayEffectSpecHandle EffectSpecHandle = ASC->MakeOutgoingSpec(StatusData.GameplayEffect, 1, MakeEffectContext(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo()));
+	FGameplayEffectSpecHandle EffectSpecHandle = ASC->MakeOutgoingSpec(StatusData.GameplayEffect.LoadSynchronous(), 1, MakeEffectContext(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo()));
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(EffectSpecHandle, FGJHGameplayTag::Ability_SetByCaller_Damage(), 2.f);
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(EffectSpecHandle, FGJHGameplayTag::Status_SetByCaller_Duration(), InDuration);
 	UAbilitySystemBlueprintLibrary::AddAssetTag(EffectSpecHandle, InStatusTag);
