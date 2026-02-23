@@ -71,7 +71,8 @@ private:
 private:
 	void ApplyDamageToTarget(const FGameplayEventData& InEventData);
 	void ApplyDamageToTarget(const TArray<FHitResult>& InHitResults);
-	void ApplyDamageToTarget(const FHitResult& InHitResult);
+	void ApplyDamageToTarget(const TSet<AActor*>& InHitActors);
+	void ApplyDamageToTarget(AActor* InHitActor);
 	void StartSweepAttack(float InTotalDuration);
 	void EndSweepAttack();
 	
@@ -82,5 +83,5 @@ private:
 	UFUNCTION()
 	void OnReceiveGameplayEvent(FGameplayEventData EventData);
 	
-	void OnTraceHit(const TArray<FHitResult> HitResults);
+	void OnTraceHit(const TSet<AActor*>& Actors);
 };

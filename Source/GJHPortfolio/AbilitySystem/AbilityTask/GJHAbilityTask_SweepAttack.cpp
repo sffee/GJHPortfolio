@@ -6,7 +6,7 @@
 
 static TAutoConsoleVariable<bool> CVarUseBakeAttackData(
 	TEXT("GJH.UseBakeAttackData"),
-	true,
+	false,
 	TEXT(""));
 
 UGJHAbilityTask_SweepAttack::UGJHAbilityTask_SweepAttack()
@@ -76,7 +76,7 @@ void UGJHAbilityTask_SweepAttack::TickTask(float DeltaTime)
 {
 #if CPUPROFILERTRACE_ENABLED
 	TRACE_CPUPROFILER_EVENT_SCOPE_STR("SweepAttack");
-#endif  // CPUPROFILERTRACE_ENABLED
+#endif
 	
 	if (CVarUseBakeAttackData.GetValueOnAnyThread())
 	{
@@ -97,11 +97,11 @@ void UGJHAbilityTask_SweepAttack::OnDestroy(bool bInOwnerFinished)
 
 void UGJHAbilityTask_SweepAttack::Process()
 {
-	TArray<FHitResult> HitResults;
-	TraceSocket(HitResults);
+	TSet<AActor*> HitActors;
+	TraceSocket(HitActors);
 		
-	if (HitResults.Num())
-		OnTraceHit.ExecuteIfBound(HitResults);
+	if (HitActors.Num())
+		OnTraceHit.ExecuteIfBound(HitActors);
 }
 
 void UGJHAbilityTask_SweepAttack::ProcessBakeData()
@@ -123,68 +123,78 @@ void UGJHAbilityTask_SweepAttack::ProcessBakeData()
         
 		if (BakeData.Time <= MontageTime)
 		{
-			TArray<FHitResult> HitResults;
-			TraceSocket(BakeData, HitResults);
+			TSet<AActor*> HitActors;
+			TraceSocket(BakeData, HitActors);
             
-			if (HitResults.Num())
-				OnTraceHit.ExecuteIfBound(HitResults);
+			if (HitActors.Num())
+				OnTraceHit.ExecuteIfBound(HitActors);
 		}
 
 		ProcessedTime += TraceInterval;
 	}
 }
 
-void UGJHAbilityTask_SweepAttack::TraceSocket(const FGJHBakeAnimSocketData& InAttackData, TArray<FHitResult>& OutHitResult)
+void UGJHAbilityTask_SweepAttack::TraceSocket(const FGJHBakeAnimSocketData& InAttackData, TSet<AActor*>& OutHitActors)
 {
 	const FTransform ComponentTransform = OwnerSkeletalMeshComponent->GetComponentTransform();
 	
 	const FVector SocketStartLocation = ComponentTransform.TransformPosition(InAttackData.SocketStartLocation);
 	const FVector SocketEndLocation = ComponentTransform.TransformPosition(InAttackData.SocketEndLocation);
 	
-	TraceSocket(SocketStartLocation, SocketEndLocation, OutHitResult);
+	TraceSocket(SocketStartLocation, SocketEndLocation, OutHitActors);
 	
 	LastStartSocketLocation = InAttackData.SocketStartLocation;
 	LastEndSocketLocation = InAttackData.SocketEndLocation;
 }
 
-void UGJHAbilityTask_SweepAttack::TraceSocket(TArray<FHitResult>& OutHitResult)
+void UGJHAbilityTask_SweepAttack::TraceSocket(TSet<AActor*>& OutHitActors)
 {
 	const FVector SocketStartLocation = OwnerSkeletalMeshComponent->GetSocketLocation(TraceStartSocketName);
 	const FVector SocketEndLocation = OwnerSkeletalMeshComponent->GetSocketLocation(TraceEndSocketName);
 	
-	TraceSocket(SocketStartLocation, SocketEndLocation, OutHitResult);
+	TraceSocket(SocketStartLocation, SocketEndLocation, OutHitActors);
 	
 	LastStartSocketLocation = SocketStartLocation;
 	LastEndSocketLocation = SocketEndLocation;
 }
 
-void UGJHAbilityTask_SweepAttack::TraceSocket(const FVector InStartSocketLocation, const FVector InEndSocketLocation, TArray<FHitResult>& OutHitResult)
+void UGJHAbilityTask_SweepAttack::TraceSocket(const FVector InStartSocketLocation, const FVector InEndSocketLocation, TSet<AActor*>& OutHitActors)
 {
 	const FTransform ComponentTransform = OwnerSkeletalMeshComponent->GetComponentTransform();
 	
-	Trace(InStartSocketLocation, InEndSocketLocation, OutHitResult);
+	Trace(InStartSocketLocation, InEndSocketLocation, OutHitActors);
 	
 	if (LastStartSocketLocation.IsNearlyZero() == false)
 	{
 		const FVector LastStartLocation = ComponentTransform.TransformPosition(LastStartSocketLocation);
 		
-		Trace(LastStartLocation, InStartSocketLocation, OutHitResult);
-		Trace(LastStartLocation, InEndSocketLocation, OutHitResult);
+		Trace(LastStartLocation, InStartSocketLocation, OutHitActors);
+		Trace(LastStartLocation, InEndSocketLocation, OutHitActors);
 	}
 	
 	if (LastEndSocketLocation.IsNearlyZero() == false)
 	{
 		const FVector LastEndLocation = ComponentTransform.TransformPosition(LastEndSocketLocation);
 		
-		Trace(LastEndLocation, InStartSocketLocation, OutHitResult);
-		Trace(LastEndLocation, InEndSocketLocation, OutHitResult);
+		Trace(LastEndLocation, InStartSocketLocation, OutHitActors);
+		Trace(LastEndLocation, InEndSocketLocation, OutHitActors);
 	}
 }
 
-void UGJHAbilityTask_SweepAttack::Trace(const FVector& InTraceStart, const FVector& InTraceEnd, TArray<FHitResult>& OutHitResult)
+void UGJHAbilityTask_SweepAttack::Trace(const FVector& InTraceStart, const FVector& InTraceEnd, TSet<AActor*>& OutHitActors)
 {
 	const EDrawDebugTrace::Type DrawDebugTrace = 0.f < DrawDebugTime ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
 	
-	UKismetSystemLibrary::SphereTraceMultiForObjects(OwnerSkeletalMeshComponent, InTraceStart, InTraceEnd, TraceRadius, { UEngineTypes::ConvertToObjectType(ECC_Pawn) },
-													 false, TArray<AActor*>(), DrawDebugTrace, OutHitResult, true, FLinearColor::Red, FLinearColor::Green, DrawDebugTime);
+	TArray<AActor*> ActorsToIgnore;
+	if (IsValid(Ability))
+		ActorsToIgnore.Add(Ability->GetAvatarActorFromActorInfo());
+	
+	TArray<FHitResult> HitResults;
+	UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), InTraceStart, InTraceEnd, TraceRadius, { UEngineTypes::ConvertToObjectType(ECC_Pawn) },
+													 false, ActorsToIgnore, DrawDebugTrace, HitResults, false, FLinearColor::Red, FLinearColor::Green, DrawDebugTime);
+	
+	for (const FHitResult& HitResult : HitResults)
+	{
+		OutHitActors.Add(HitResult.GetActor());
+	}
 }

@@ -54,7 +54,7 @@ private:
 
 public:
 	UFUNCTION(Client, Reliable)
-	void Client_CreateDamageText(AActor* InTargetActor, float InDamage) const;
+	void Client_CreateDamageText(AActor* InTargetActor, float InDamage, const FGameplayTag& InStatusTag) const;
 	
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;

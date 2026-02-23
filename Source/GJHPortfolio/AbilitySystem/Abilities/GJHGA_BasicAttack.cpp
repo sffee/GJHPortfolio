@@ -114,7 +114,7 @@ void UGJHGA_BasicAttack::ApplyDamageToTarget(const FGameplayEventData& InEventDa
 	for (int32 i = 0; i < InEventData.TargetData.Num(); ++i)
 	{
 		const FHitResult HitResult = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(InEventData.TargetData, i);
-		ApplyDamageToTarget(HitResult);
+		ApplyDamageToTarget(HitResult.GetActor());
 	}
 }
 
@@ -122,20 +122,27 @@ void UGJHGA_BasicAttack::ApplyDamageToTarget(const TArray<FHitResult>& InHitResu
 {
 	for (const FHitResult& HitResult : InHitResults)
 	{
-		ApplyDamageToTarget(HitResult);
+		ApplyDamageToTarget(HitResult.GetActor());
 	}
 }
 
-void UGJHGA_BasicAttack::ApplyDamageToTarget(const FHitResult& InHitResult)
+void UGJHGA_BasicAttack::ApplyDamageToTarget(const TSet<AActor*>& InHitActors)
 {
-	AActor* HitActor = InHitResult.GetActor();
+	for (AActor* HitActor : InHitActors)
+	{
+		ApplyDamageToTarget(HitActor);
+	}
+}
 
-	if (HitActors.Contains(HitActor))
+void UGJHGA_BasicAttack::ApplyDamageToTarget(AActor* InHitActor)
+{
+	if (HitActors.Contains(InHitActor))
 		return;
 
-	HitActors.Add(HitActor);
+	HitActors.Add(InHitActor);
 
-	ApplyDamage(GetDamage(CurrentComboIndex + 1), HitActor, CurrentComboIndex + 1);
+	ApplyDamage(GetDamage(CurrentComboIndex + 1), InHitActor, CurrentComboIndex + 1);
+	ApplyStatusDamage(StatusDuration, InHitActor, FGJHGameplayTag::Status_Type_Poison());
 }
 
 void UGJHGA_BasicAttack::StartSweepAttack(float InTotalDuration)
@@ -201,7 +208,7 @@ void UGJHGA_BasicAttack::OnReceiveGameplayEvent(FGameplayEventData EventData)
 	}
 }
 
-void UGJHGA_BasicAttack::OnTraceHit(const TArray<FHitResult> HitResults)
+void UGJHGA_BasicAttack::OnTraceHit(const TSet<AActor*>& Actors)
 {
-	ApplyDamageToTarget(HitResults);
+	ApplyDamageToTarget(Actors);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Components/WidgetComponent.h"
 #include "GJHDamageTextComponent.generated.h"
 
@@ -16,5 +17,5 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	void SetDamage(float InDamage);
+	void SetDamage(float InDamage, const FGameplayTag& InStatusTag);
 };

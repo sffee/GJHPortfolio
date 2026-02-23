@@ -1,6 +1,7 @@
 #include "GJHCharacterBase.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/GJHAbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayTag/GJHGameplayTag.h"
 #include "Subsystem/GJHActorSubSystem.h"
@@ -38,6 +39,17 @@ void AGJHCharacterBase::Tick(float DeltaTime)
 void AGJHCharacterBase::AddCharacterLevel(int32 InAddLevel)
 {
 	CharacterLevel += InAddLevel;
+}
+
+void AGJHCharacterBase::HandleGameplayCue(AActor* Self, FGameplayTag GameplayCueTag, EGameplayCueEvent::Type EventType, const FGameplayCueParameters& Parameters)
+{
+	IGameplayCueInterface::HandleGameplayCue(Self, GameplayCueTag, EventType, Parameters);
+	
+	UGJHAbilitySystemComponent* GJHAbilitySystemComponent = Cast<UGJHAbilitySystemComponent>(GetAbilitySystemComponent()); 
+	if (IsValid(GJHAbilitySystemComponent))
+	{
+		GJHAbilitySystemComponent->NotifyStatusTagChanged(Parameters.OriginalTag, Parameters.RawMagnitude);
+	}
 }
 
 void AGJHCharacterBase::OnDeathTagUpdated(const FGameplayTag Tag, int32 NewCount)

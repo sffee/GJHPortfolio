@@ -86,6 +86,11 @@ void AGJHMonsterAIController::SetTarget(AActor* InTargetActor)
 		GetBlackboardComponent()->ClearValue(FGJHBlackboardKeyName::Target);
 }
 
+UAbilitySystemComponent* AGJHMonsterAIController::GetAbilitySystemComponent() const
+{
+	return OwningAbilitySystemComponent.Get();
+}
+
 void AGJHMonsterAIController::OnHitReactionTagUpdated(const FGameplayTag Tag, int32 NewCount)
 {
 	if (0 < NewCount)

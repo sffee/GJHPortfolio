@@ -8,6 +8,7 @@
 DECLARE_MULTICAST_DELEGATE_OneParam(FGJHAbilitiesGiven, const FGameplayAbilitySpec& AbilitySpec);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FGJHAbilityEquipped, int32 SkillIndex, FGameplayTag EquipQuickSlotInputTag, FGameplayTag PrevQuickSlotInputTag);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FGJHAbilityLevelChanged, int32 SkillIndex, int32 NewLevel);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FGJHStatusTagChanged, const FGameplayTag InStatusTag, int32 Count);
 
 UCLASS()
 class GJHPORTFOLIO_API UGJHAbilitySystemComponent : public UAbilitySystemComponent
@@ -18,6 +19,7 @@ public:
 	FGJHAbilitiesGiven OnAbilityGiven;
 	FGJHAbilityEquipped OnAbilityEquipped;
 	FGJHAbilityLevelChanged OnAbilityLevelChanged;
+	FGJHStatusTagChanged OnStatusTagChanged;
 	
 public:
 	UGJHAbilitySystemComponent();
@@ -57,6 +59,15 @@ public:
 private:
 	bool AbilityHasAnyQuickSlot(FGameplayAbilitySpec* InAbilitySpec) const;
 	void ClearQuickSlot(FGameplayAbilitySpec* InAbilitySpec);
+	
+private:
+	void ExecuteStatusCountGameplayCue(const FGameplayEffectSpec& InEffectSpec, int32 InCount);
+	
+	void OnGameplayEffectApplied(UAbilitySystemComponent* ASC, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle EffectHandle);
+	void OnGameplayEffectRemoved(const FActiveGameplayEffect& Effect);
+	
+public:
+	void NotifyStatusTagChanged(const FGameplayTag& InStatusTag, int32 InCount);
 	
 public:
 	FGameplayAbilitySpec* GetSpecByAbilityTag(const FGameplayTag& InAbilityTag);

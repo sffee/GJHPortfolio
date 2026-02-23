@@ -5,6 +5,7 @@
 #include "Engine/DeveloperSettings.h"
 #include "GJHUIDeveloperSettings.generated.h"
 
+class UGameplayEffect;
 class UGJHUserWidgetBase;
 
 USTRUCT()

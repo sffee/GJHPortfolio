@@ -5,6 +5,7 @@
 
 #include "GJHMonsterCharacter.generated.h"
 
+class UGJHActorStatusWidgetComponent;
 class UGJHMonsterRewardDataAsset;
 class UGJHOverHeadWidgetComponent;
 class UBehaviorTree;
@@ -24,7 +25,10 @@ private:
 	TObjectPtr<UGJHCharacterAttributeSet> AttributeSet;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UGJHOverHeadWidgetComponent> OverHeadWidgetComponent; 
+	TObjectPtr<UGJHOverHeadWidgetComponent> OverHeadWidgetComponent;
+	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UGJHActorStatusWidgetComponent> ActorStatusWidgetComponent;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "GJH")
@@ -49,6 +53,7 @@ public:
 private:
 	void InitAbilitySystem();
 	void InitOverHeadWidgetComponent() const;
+	void InitActorStatusWidgetComponent() const;
 
 protected:
 	virtual FGenericTeamId GetGenericTeamId() const override;

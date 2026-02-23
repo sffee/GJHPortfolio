@@ -141,7 +141,7 @@ void AGJHPlayerController::Input_Inventory(const FInputActionValue& Value)
 	InventoryComponent->AddItem(1, 3);
 }
 
-void AGJHPlayerController::Client_CreateDamageText_Implementation(AActor* InTargetActor, float InDamage) const
+void AGJHPlayerController::Client_CreateDamageText_Implementation(AActor* InTargetActor, float InDamage, const FGameplayTag& InStatusTag) const
 {	
 	if (IsValid(DamageTextComponentClass) == false || IsValid(InTargetActor) == false)
 		return;
@@ -150,5 +150,5 @@ void AGJHPlayerController::Client_CreateDamageText_Implementation(AActor* InTarg
 	DamageTextComponent->RegisterComponent();
 	DamageTextComponent->AttachToComponent(InTargetActor->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 	DamageTextComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	DamageTextComponent->SetDamage(InDamage);
+	DamageTextComponent->SetDamage(InDamage, InStatusTag);
 }

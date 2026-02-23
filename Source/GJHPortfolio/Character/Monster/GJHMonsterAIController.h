@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
 #include "AIController.h"
 #include "GameplayTagContainer.h"
 #include "Perception/AIPerceptionTypes.h"
@@ -13,7 +14,7 @@ class UAISenseConfig_Sight;
 class UBehaviorTreeComponent;
 
 UCLASS()
-class GJHPORTFOLIO_API AGJHMonsterAIController : public AAIController
+class GJHPORTFOLIO_API AGJHMonsterAIController : public AAIController, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -50,6 +51,8 @@ private:
 
 public:
 	UBehaviorTreeComponent* GetBehaviorTreeComponent() const { return BehaviorTreeComponent; };
+	
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 private:
 	void OnHitReactionTagUpdated(const FGameplayTag Tag, int32 NewCount);

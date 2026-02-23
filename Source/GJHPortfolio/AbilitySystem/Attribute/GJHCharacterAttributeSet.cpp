@@ -25,7 +25,7 @@ void UGJHCharacterAttributeSet::PreAttributeChange(const FGameplayAttribute& Att
 void UGJHCharacterAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
-
+	
 	FGJHEffectProperties GJHEffectProperties;
 	SetEffectProperties(Data, GJHEffectProperties);
 
@@ -80,6 +80,16 @@ void UGJHCharacterAttributeSet::SetEffectProperties(const FGameplayEffectModCall
 		OutProperties.TargetController = InData.Target.AbilityActorInfo->PlayerController.Get();
 		OutProperties.TargetCharacter = Cast<AGJHCharacterBase>(OutProperties.TargetAvatarActor);
 		OutProperties.TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OutProperties.TargetAvatarActor);
+	}
+	
+	FGameplayTagContainer SpecTags;
+	InData.EffectSpec.GetAllGrantedTags(SpecTags);
+	
+	const FGameplayTagContainer StatusFilterTag = FGameplayTagContainer(FGJHGameplayTag::Status_Type());
+	FGameplayTagContainer StatusTag = SpecTags.Filter(StatusFilterTag);
+	if (StatusTag.IsValid())
+	{
+		OutProperties.StatusTag = StatusTag.GetByIndex(0);
 	}
 }
 
@@ -152,7 +162,7 @@ void UGJHCharacterAttributeSet::CreateDamageText(float InDamage, const FGJHEffec
 	if (InGJHEffectProperties.SourceCharacter != InGJHEffectProperties.TargetCharacter)
 	{
 		if (AGJHPlayerController* PlayerController = Cast<AGJHPlayerController>(InGJHEffectProperties.SourceCharacter->Controller))
-			PlayerController->Client_CreateDamageText(InGJHEffectProperties.TargetAvatarActor, InDamage);
+			PlayerController->Client_CreateDamageText(InGJHEffectProperties.TargetAvatarActor, InDamage, InGJHEffectProperties.StatusTag);
 	}
 }
 
@@ -174,4 +184,24 @@ void UGJHCharacterAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldMana
 void UGJHCharacterAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UGJHCharacterAttributeSet, MaxMana, OldMaxMana);
+}
+
+void UGJHCharacterAttributeSet::OnRep_Strength(const FGameplayAttributeData& OldStrength) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGJHCharacterAttributeSet, Strength, OldStrength);
+}
+
+void UGJHCharacterAttributeSet::OnRep_Armor(const FGameplayAttributeData& OldArmor) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGJHCharacterAttributeSet, Armor, OldArmor);
+}
+
+void UGJHCharacterAttributeSet::OnRep_StatusDamageRatio(const FGameplayAttributeData& OldStatusDamageRatio) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGJHCharacterAttributeSet, StatusDamageRatio, OldStatusDamageRatio);
+}
+
+void UGJHCharacterAttributeSet::OnRep_StatusDamageResist(const FGameplayAttributeData& OldStatusDamageResist) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UGJHCharacterAttributeSet, StatusDamageResist, OldStatusDamageResist);
 }

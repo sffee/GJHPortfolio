@@ -49,6 +49,9 @@ public:
 
 	UPROPERTY()
 	TObjectPtr<AGJHCharacterBase> TargetCharacter;
+	
+	UPROPERTY()
+	FGameplayTag StatusTag;
 };
 
 UCLASS()
@@ -98,6 +101,22 @@ public:
 	FGameplayAttributeData MaxMana;
 	ATTRIBUTE_ACCESSORS(UGJHCharacterAttributeSet, MaxMana)
 	
+	UPROPERTY(ReplicatedUsing = OnRep_Strength)
+	FGameplayAttributeData Strength;
+	ATTRIBUTE_ACCESSORS(UGJHCharacterAttributeSet, Strength)
+	
+	UPROPERTY(ReplicatedUsing = OnRep_Armor)
+	FGameplayAttributeData Armor;
+	ATTRIBUTE_ACCESSORS(UGJHCharacterAttributeSet, Armor)
+	
+	UPROPERTY(ReplicatedUsing = OnRep_StatusDamageRatio)
+	FGameplayAttributeData StatusDamageRatio;
+	ATTRIBUTE_ACCESSORS(UGJHCharacterAttributeSet, StatusDamageRatio)
+	
+	UPROPERTY(ReplicatedUsing = OnRep_StatusDamageResist)
+	FGameplayAttributeData StatusDamageResist;
+	ATTRIBUTE_ACCESSORS(UGJHCharacterAttributeSet, StatusDamageResist)
+	
 private:
 	UFUNCTION()
 	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;
@@ -110,4 +129,16 @@ private:
 	
 	UFUNCTION()
 	void OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const;
+	
+	UFUNCTION()
+	void OnRep_Strength(const FGameplayAttributeData& OldStrength) const;
+	
+	UFUNCTION()
+	void OnRep_Armor(const FGameplayAttributeData& OldArmor) const;
+	
+	UFUNCTION()
+	void OnRep_StatusDamageRatio(const FGameplayAttributeData& OldStatusDamageRatio) const;
+	
+	UFUNCTION()
+	void OnRep_StatusDamageResist(const FGameplayAttributeData& OldStatusDamageResist) const;
 };

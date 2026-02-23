@@ -152,3 +152,15 @@ TSubclassOf<UGJHItemDefinition> UGJHDataStatics::GetItemDefinition(const UObject
 	UGJHDataSubSystem* DataSubSystem = UGJHDataSubSystem::Get(InWorldContextObject);
 	return IsValid(DataSubSystem) ? DataSubSystem->GetItemInfo(InItemIndex).ItemDefinition : nullptr;
 }
+
+FGJHStatusData UGJHDataStatics::GetStatusData(const FGameplayTag& InStatusTag)
+{
+	const UGJHDataDeveloperSettings* GJHDataDeveloperSettings = GetDefault<UGJHDataDeveloperSettings>();
+	if (GJHDataDeveloperSettings->StatusMap.Contains(InStatusTag) == false)
+	{
+		ensureMsgf(false, TEXT("Status Not Found!!"));
+		return FGJHStatusData();
+	}
+	
+	return GJHDataDeveloperSettings->StatusMap[InStatusTag];
+}

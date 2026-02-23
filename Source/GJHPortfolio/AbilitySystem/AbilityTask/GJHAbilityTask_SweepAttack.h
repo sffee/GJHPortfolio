@@ -5,7 +5,7 @@
 #include "Data/DataAsset/GJHBakeAttackAnimSequenceDataAsset.h"
 #include "GJHAbilityTask_SweepAttack.generated.h"
 
-DECLARE_DELEGATE_OneParam(FGJHOnTraceHit, const TArray<FHitResult> HitResults);
+DECLARE_DELEGATE_OneParam(FGJHOnTraceHit, const TSet<AActor*>& HitActors);
 
 class UGJHBakeAttackAnimSequenceDataAsset;
 
@@ -67,8 +67,8 @@ public:
 private:
 	void Process();
 	void ProcessBakeData();
-	void TraceSocket(const FGJHBakeAnimSocketData& InAttackData, TArray<FHitResult>& OutHitResult);
-	void TraceSocket(TArray<FHitResult>& OutHitResult);
-	void TraceSocket(const FVector InStartSocketLocation, const FVector InEndSocketLocation, TArray<FHitResult>& OutHitResult);
-	void Trace(const FVector& InTraceStart, const FVector& InTraceEnd, TArray<FHitResult>& OutHitResult);
+	void TraceSocket(const FGJHBakeAnimSocketData& InAttackData, TSet<AActor*>& OutHitActors);
+	void TraceSocket(TSet<AActor*>& OutHitActors);
+	void TraceSocket(const FVector InStartSocketLocation, const FVector InEndSocketLocation, TSet<AActor*>& OutHitActors);
+	void Trace(const FVector& InTraceStart, const FVector& InTraceEnd, TSet<AActor*>& OutHitActors);
 };

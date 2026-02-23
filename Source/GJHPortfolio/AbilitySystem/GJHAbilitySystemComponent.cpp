@@ -17,6 +17,9 @@ UGJHAbilitySystemComponent::UGJHAbilitySystemComponent()
 void UGJHAbilitySystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &ThisClass::OnGameplayEffectApplied);
+	OnAnyGameplayEffectRemovedDelegate().AddUObject(this, &UGJHAbilitySystemComponent::OnGameplayEffectRemoved);
 }
 
 void UGJHAbilitySystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -305,4 +308,36 @@ void UGJHAbilitySystemComponent::ClearQuickSlot(FGameplayAbilitySpec* InAbilityS
 	const FGameplayTag SlotTag = GetQuickSlotInputTagFromSpec(InAbilitySpec);
 	if (SlotTag.IsValid())
 		InAbilitySpec->GetDynamicSpecSourceTags().RemoveTag(SlotTag);
+}
+
+void UGJHAbilitySystemComponent::ExecuteStatusCountGameplayCue(const FGameplayEffectSpec& InEffectSpec, int32 InCount)
+{
+	FGameplayTagContainer AssetTags;
+	InEffectSpec.GetAllGrantedTags(AssetTags);
+	
+	if (AssetTags.HasTagExact(FGJHGameplayTag::Status_Type()) || AssetTags.HasTag(FGJHGameplayTag::Status_Type()) == false)
+		return;
+	
+	const FGameplayTag StatusTag = AssetTags.GetByIndex(0);
+	
+	FGameplayCueParameters CueParams;
+	CueParams.OriginalTag = StatusTag;
+	CueParams.RawMagnitude = InCount;
+	
+	ExecuteGameplayCue(StatusTag, MoveTemp(CueParams));
+}
+
+void UGJHAbilitySystemComponent::OnGameplayEffectApplied(UAbilitySystemComponent* ASC, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle EffectHandle)
+{
+	ExecuteStatusCountGameplayCue(EffectSpec, GetCurrentStackCount(EffectHandle));
+}
+
+void UGJHAbilitySystemComponent::OnGameplayEffectRemoved(const FActiveGameplayEffect& Effect)
+{
+	ExecuteStatusCountGameplayCue(Effect.Spec, 0);
+}
+
+void UGJHAbilitySystemComponent::NotifyStatusTagChanged(const FGameplayTag& InStatusTag, int32 InCount)
+{
+	OnStatusTagChanged.Broadcast(InStatusTag, InCount);
 }

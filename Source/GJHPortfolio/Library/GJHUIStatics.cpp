@@ -38,3 +38,5 @@ FVector2D UGJHUIStatics::GetWidgetViewportPosition(UWidget* InWidget, const FVec
 	
 	return ViewportPosition;
 }
+
+

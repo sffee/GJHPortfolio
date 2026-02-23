@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "GameplayCueInterface.h"
 #include "GameplayTagContainer.h"
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/Character.h"
@@ -12,10 +13,10 @@ class UGameplayEffect;
 class UGameplayAbility;
 
 UCLASS()
-class GJHPORTFOLIO_API AGJHCharacterBase : public ACharacter, public IAbilitySystemInterface, public IGenericTeamAgentInterface
+class GJHPORTFOLIO_API AGJHCharacterBase : public ACharacter, public IAbilitySystemInterface, public IGenericTeamAgentInterface, public IGameplayCueInterface
 {
 	GENERATED_BODY()
-
+	
 protected:
 	UPROPERTY(EditAnywhere, Category = "GJH|Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartUpAbilities;
@@ -44,6 +45,8 @@ public:
 	
 public:
 	virtual void OnDeath() { }
+	
+	virtual void HandleGameplayCue(AActor* Self, FGameplayTag GameplayCueTag, EGameplayCueEvent::Type EventType, const FGameplayCueParameters& Parameters) override;
 
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return nullptr; }

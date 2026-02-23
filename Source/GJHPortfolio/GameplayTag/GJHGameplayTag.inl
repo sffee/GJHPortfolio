@@ -50,3 +50,16 @@ GJH_GAMEPLAYTAG(Ability_SetByCaller_Damage, "Ability.SetByCaller.Damage")
 GJH_GAMEPLAYTAG(Ability_DamageType_Attack, "Ability.DamageType.Attack")
 
 GJH_GAMEPLAYTAG(Ability_Cooldown_PowerAttack, "Ability.Cooldown.PowerAttack")
+
+// Status
+GJH_GAMEPLAYTAG(Status, "Status")
+
+GJH_GAMEPLAYTAG(Status_SetByCaller_Duration, "Status.SetByCaller.Duration")
+
+GJH_GAMEPLAYTAG(Status_Type, "Status.Type")
+GJH_GAMEPLAYTAG(Status_Type_Poison, "Status.Type.Poison")
+GJH_GAMEPLAYTAG(Status_Type_Poison_Deadly, "Status.Type.Poison.Deadly")
+GJH_GAMEPLAYTAG(Status_Type_Bleeding, "Status.Type.Bleeding")
+
+// Cue
+GJH_GAMEPLAYTAG(GameplayCue_UpdateStatus, "GameplayCue.UpdateStatus")

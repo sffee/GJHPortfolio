@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Data/DataTable/GJHDataTableTypes.h"
+#include "GJHSettings/GJHDataDeveloperSettings.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "GJHDataStatics.generated.h"
 
@@ -40,6 +41,8 @@ public:
 	static void ForeachSkillInfo(const UObject* InWorldContextObject, const FGameplayTag& InCharacterTypeTag, TFunctionRef<void(const FGJHSkillTableInfo&)> InFunc);
 
 	static TSubclassOf<UGJHItemDefinition> GetItemDefinition(const UObject* InWorldContextObject, const int32 InItemIndex);
+	
+	static FGJHStatusData GetStatusData(const FGameplayTag& InStatusTag);
 };
 
 template <typename T>

@@ -4,7 +4,9 @@
 #include "AbilitySystem/GJHAbilitySystemComponent.h"
 #include "AbilitySystem/Attribute/GJHCharacterAttributeSet.h"
 #include "AI/GJHAITypes.h"
+#include "Character/Components/GJHActorStatusWidgetComponent.h"
 #include "Character/Components/GJHOverHeadWidgetComponent.h"
+#include "UI/Status/GJHActorStatusWidget.h"
 #include "UI/Status/GJHOverHeadStatusWidget.h"
 
 AGJHMonsterCharacter::AGJHMonsterCharacter()
@@ -18,15 +20,21 @@ AGJHMonsterCharacter::AGJHMonsterCharacter()
 	OverHeadWidgetComponent->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 	OverHeadWidgetComponent->SetupAttachment(GetMesh());
 	
-	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
+	ActorStatusWidgetComponent = CreateDefaultSubobject<UGJHActorStatusWidgetComponent>(TEXT("ActorStatusWidgetComponent"));
+	ActorStatusWidgetComponent->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+	ActorStatusWidgetComponent->SetupAttachment(GetMesh());
 }
 
 void AGJHMonsterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	if (GetNetMode() == NM_DedicatedServer)
+		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
 
 	InitAbilitySystem();
 	InitOverHeadWidgetComponent();
+	InitActorStatusWidgetComponent();
 }
 
 void AGJHMonsterCharacter::OnDeath()
@@ -55,6 +63,18 @@ void AGJHMonsterCharacter::InitOverHeadWidgetComponent() const
 	if (IsValid(OverHeadStatusWidget))
 	{
 		OverHeadStatusWidget->SetAbilitySystemComponent(AbilitySystemComponent);
+	}
+}
+
+void AGJHMonsterCharacter::InitActorStatusWidgetComponent() const
+{
+	if (GetNetMode() == NM_DedicatedServer)
+		return;
+	
+	UGJHActorStatusWidget* ActorStatusWidget = Cast<UGJHActorStatusWidget>(ActorStatusWidgetComponent->GetUserWidgetObject());
+	if (IsValid(ActorStatusWidget))
+	{
+		ActorStatusWidget->SetAbilitySystemComponent(AbilitySystemComponent);
 	}
 }
 

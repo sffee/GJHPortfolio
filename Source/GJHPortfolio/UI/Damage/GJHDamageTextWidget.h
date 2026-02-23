@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "UI/GJHUserWidgetBase.h"
 #include "GJHDamageTextWidget.generated.h"
 
@@ -19,5 +20,5 @@ private:
 	TObjectPtr<UWidgetAnimation> Animation_DamageText;
 
 public:
-	void SetDamage(float InDamage);
+	void SetDamage(float InDamage, const FGameplayTag& InStatusTag);
 };

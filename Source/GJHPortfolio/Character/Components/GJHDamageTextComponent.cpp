@@ -12,11 +12,11 @@ void UGJHDamageTextComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UGJHDamageTextComponent::SetDamage(float InDamage)
+void UGJHDamageTextComponent::SetDamage(float InDamage, const FGameplayTag& InStatusTag)
 {
 	if (UGJHDamageTextWidget* DamageTextWidget = Cast<UGJHDamageTextWidget>(GetUserWidgetObject()))
 	{
-		DamageTextWidget->SetDamage(InDamage);
+		DamageTextWidget->SetDamage(InDamage, InStatusTag);
 	}
 
 	FTimerHandle TimerHandle;

@@ -19,10 +19,17 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = "Ability|Default")
 	TSubclassOf<UGameplayEffect> DamageEffect;
+	
+	UPROPERTY(EditAnywhere, Category = "Ability|Status", meta = (Categories = "Status.Type"))
+	FGameplayTag StatusTag;
+	
+	UPROPERTY(EditAnywhere, Category = "Ability|Status")
+	float StatusDuration;
 
 protected:
 	float GetDamage(int32 InComboIndex);
 	void ApplyDamage(float InDamage, AActor* InTarget, const int32 InComboIndex, const FGameplayTag& InDamageType = FGJHGameplayTag::Ability_DamageType_Attack()) const;
+	void ApplyStatusDamage(float InDuration, AActor* InTarget, const FGameplayTag& InStatusTag) const;
 
 private:
 	FGameplayEffectContextHandle MakeDamageEffectContext(AActor* InTarget, const int32 InComboIndex) const;
