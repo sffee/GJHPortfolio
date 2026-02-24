@@ -18,6 +18,14 @@ AGJHCharacterBase::AGJHCharacterBase()
 void AGJHCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
+		GetMesh()->SetGenerateOverlapEvents(false);
+		GetMesh()->bUpdateOverlapsOnAnimationFinalize = false;
+		GetMesh()->bDisableClothSimulation = true;
+	}
 
 	if (IsValid(GetAbilitySystemComponent()))
 		DeathTagDelegateHandle = GetAbilitySystemComponent()->RegisterGameplayTagEvent(FGJHGameplayTag::Ability_Common_Death()).AddUObject(this, &ThisClass::OnDeathTagUpdated);
@@ -41,7 +49,10 @@ void AGJHCharacterBase::AddCharacterLevel(int32 InAddLevel)
 	CharacterLevel += InAddLevel;
 }
 
-void AGJHCharacterBase::HandleGameplayCue(AActor* Self, FGameplayTag GameplayCueTag, EGameplayCueEvent::Type EventType, const FGameplayCueParameters& Parameters)
+void AGJHCharacterBase::HandleGameplayCue(AActor* Self,
+	FGameplayTag GameplayCueTag,
+	EGameplayCueEvent::Type EventType,
+	const FGameplayCueParameters& Parameters)
 {
 	IGameplayCueInterface::HandleGameplayCue(Self, GameplayCueTag, EventType, Parameters);
 	

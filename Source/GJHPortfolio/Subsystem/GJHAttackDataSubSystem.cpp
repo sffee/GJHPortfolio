@@ -35,11 +35,10 @@ void UGJHAttackDataSubSystem::Initialize(FSubsystemCollectionBase& Collection)
 		AnimFileName.RemoveFromStart(TEXT("DA_"));
 		AnimFileName.RemoveFromEnd(TEXT("_AttackData"));
 		
-		const uint32 AnimFileHash = GetTypeHash(AnimFileName);
-		
-		const FSoftObjectPath SoftObjectPath = FSoftObjectPath(FTopLevelAssetPath(FName(FilePath), FName(BaseFileName)));
+		const FTopLevelAssetPath AssetPath = FTopLevelAssetPath(FName(FilePath), FName(BaseFileName));
+		const FSoftObjectPath SoftObjectPath = FSoftObjectPath(AssetPath);
 		TSoftObjectPtr<UGJHBakeAttackAnimSequenceDataAsset> SoftPath(SoftObjectPath);
-		AttackDataMap.Add(AnimFileHash, SoftPath);
+		AttackDataMap.Add(FName(AnimFileName), SoftPath);
 	});
 	
 	GetWorld()->GetTimerManager().SetTimer(CollectAttackDataDelegateHandle, this, &ThisClass::OnCollectAttackData, 60.f, true);
@@ -56,25 +55,24 @@ void UGJHAttackDataSubSystem::Deinitialize()
 
 UGJHBakeAttackAnimSequenceDataAsset* UGJHAttackDataSubSystem::GetAttackData(const FString& InAnimFileName)
 {
-	const uint32 AnimFileHash = GetTypeHash(InAnimFileName);
-	return GetAttackData(AnimFileHash);
+	return GetAttackData(FName(InAnimFileName));
 }
 
-UGJHBakeAttackAnimSequenceDataAsset* UGJHAttackDataSubSystem::GetAttackData(uint32 InAnimFileHash)
+UGJHBakeAttackAnimSequenceDataAsset* UGJHAttackDataSubSystem::GetAttackData(FName InAnimFileName)
 {
-	if (FGJHCachedAttackData* AttackData = LoadedAttackData.Find(InAnimFileHash))
+	if (FGJHCachedAttackData* AttackData = LoadedAttackData.Find(InAnimFileName))
 	{
 		AttackData->Time = GetWorld()->GetTimeSeconds();
 		return AttackData->AttackData;
 	}
 	
-	if (TSoftObjectPtr<UGJHBakeAttackAnimSequenceDataAsset>* AttackDataPtr = AttackDataMap.Find(InAnimFileHash))
+	if (TSoftObjectPtr<UGJHBakeAttackAnimSequenceDataAsset>* AttackDataPtr = AttackDataMap.Find(InAnimFileName))
 	{
 		FGJHCachedAttackData AttackData;
 		AttackData.Time = GetWorld()->GetTimeSeconds();
 		AttackData.AttackData = AttackDataPtr->LoadSynchronous();
 		
-		return LoadedAttackData.Add(InAnimFileHash, MoveTemp(AttackData)).AttackData;
+		return LoadedAttackData.Add(InAnimFileName, MoveTemp(AttackData)).AttackData;
 	}
 	
 	return nullptr;

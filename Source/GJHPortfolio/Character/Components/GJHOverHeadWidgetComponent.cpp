@@ -29,6 +29,9 @@ void UGJHOverHeadWidgetComponent::BeginPlay()
 	Super::BeginPlay();
 
 	OwningCharacter = GetOwner<AGJHCharacterBase>();
+	
+	if (GetNetMode() == NM_DedicatedServer)
+		SetComponentTickEnabled(false);
 }
 
 bool UGJHOverHeadWidgetComponent::IsOwnerCharacterDeath() const

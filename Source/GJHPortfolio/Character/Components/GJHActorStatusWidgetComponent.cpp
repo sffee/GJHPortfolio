@@ -8,4 +8,7 @@ UGJHActorStatusWidgetComponent::UGJHActorStatusWidgetComponent()
 void UGJHActorStatusWidgetComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	if (GetNetMode() == NM_DedicatedServer)
+		SetComponentTickEnabled(false);
 }

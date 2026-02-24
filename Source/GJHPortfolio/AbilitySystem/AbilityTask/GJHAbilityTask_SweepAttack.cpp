@@ -6,7 +6,7 @@
 
 static TAutoConsoleVariable<bool> CVarUseBakeAttackData(
 	TEXT("GJH.UseBakeAttackData"),
-	false,
+	true,
 	TEXT(""));
 
 UGJHAbilityTask_SweepAttack::UGJHAbilityTask_SweepAttack()

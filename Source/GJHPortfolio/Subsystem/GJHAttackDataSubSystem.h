@@ -23,10 +23,10 @@ class GJHPORTFOLIO_API UGJHAttackDataSubSystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 	
 private:
-	TMap<uint32, TSoftObjectPtr<UGJHBakeAttackAnimSequenceDataAsset>> AttackDataMap;
+	TMap<FName, TSoftObjectPtr<UGJHBakeAttackAnimSequenceDataAsset>> AttackDataMap;
 	
 	UPROPERTY()
-	TMap<uint32, FGJHCachedAttackData> LoadedAttackData;
+	TMap<FName, FGJHCachedAttackData> LoadedAttackData;
 	
 	FTimerHandle CollectAttackDataDelegateHandle;
 	
@@ -38,7 +38,7 @@ public:
 	
 public:
 	UGJHBakeAttackAnimSequenceDataAsset* GetAttackData(const FString& InAnimFileName);
-	UGJHBakeAttackAnimSequenceDataAsset* GetAttackData(uint32 InAnimFileHash);
+	UGJHBakeAttackAnimSequenceDataAsset* GetAttackData(FName InAnimFileHash);
 	
 private:
 	void OnCollectAttackData();

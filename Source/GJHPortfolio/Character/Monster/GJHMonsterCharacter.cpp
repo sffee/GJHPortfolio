@@ -18,19 +18,18 @@ AGJHMonsterCharacter::AGJHMonsterCharacter()
 	
 	OverHeadWidgetComponent = CreateDefaultSubobject<UGJHOverHeadWidgetComponent>(TEXT("OverHeadWidgetComponent"));
 	OverHeadWidgetComponent->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+	OverHeadWidgetComponent->SetGenerateOverlapEvents(false);
 	OverHeadWidgetComponent->SetupAttachment(GetMesh());
 	
 	ActorStatusWidgetComponent = CreateDefaultSubobject<UGJHActorStatusWidgetComponent>(TEXT("ActorStatusWidgetComponent"));
 	ActorStatusWidgetComponent->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+	ActorStatusWidgetComponent->SetGenerateOverlapEvents(false);
 	ActorStatusWidgetComponent->SetupAttachment(GetMesh());
 }
 
 void AGJHMonsterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	if (GetNetMode() == NM_DedicatedServer)
-		GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered;
 
 	InitAbilitySystem();
 	InitOverHeadWidgetComponent();

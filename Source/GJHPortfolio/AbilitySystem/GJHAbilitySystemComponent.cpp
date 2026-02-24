@@ -19,7 +19,7 @@ void UGJHAbilitySystemComponent::BeginPlay()
 	Super::BeginPlay();
 	
 	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &ThisClass::OnGameplayEffectApplied);
-	OnAnyGameplayEffectRemovedDelegate().AddUObject(this, &UGJHAbilitySystemComponent::OnGameplayEffectRemoved);
+	OnAnyGameplayEffectRemovedDelegate().AddUObject(this, &ThisClass::OnGameplayEffectRemoved);
 }
 
 void UGJHAbilitySystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
